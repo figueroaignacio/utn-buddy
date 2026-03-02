@@ -1,36 +1,11 @@
-'use client';
-
-import { motion } from 'motion/react';
-
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 10 },
-  show: { opacity: 1, y: 0 },
-};
-
 const SKELETON_ITEMS = Array.from({ length: 4 });
 
 export function ChatSkeleton() {
   return (
-    <motion.div
-      variants={container}
-      initial="hidden"
-      animate="show"
-      className="flex flex-col gap-8 px-4 py-8 max-w-3xl mx-auto w-full"
-    >
+    <div className="flex flex-col gap-8 px-4 py-8 max-w-3xl mx-auto w-full">
       {SKELETON_ITEMS.map((_, i) => (
-        <motion.div
+        <div
           key={i}
-          variants={item}
           className={`flex gap-4 items-start ${i % 2 === 0 ? 'flex-row' : 'flex-row-reverse'}`}
         >
           <div className="h-9 w-9 rounded-full bg-secondary shrink-0 relative overflow-hidden">
@@ -52,8 +27,8 @@ export function ChatSkeleton() {
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       ))}
-    </motion.div>
+    </div>
   );
 }
