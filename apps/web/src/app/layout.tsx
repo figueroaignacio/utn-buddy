@@ -1,7 +1,7 @@
+import { Providers } from '@/components/shared/providers';
 import { AuthDialogWrapper } from '@/features/auth/components/auth-dialog-wrapper';
 import { geistMono, geistSans, jetbrains } from '@/lib/fonts';
 import { rootMetadata } from '@/lib/metadata';
-import { Providers } from '@/providers/providers';
 import '@repo/ui/globals.css';
 
 export default function RootLayout({
