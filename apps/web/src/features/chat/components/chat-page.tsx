@@ -113,7 +113,6 @@ export function ChatPage() {
               onChange={setInput}
               onSubmit={handleSubmit}
               isLoading={showThinking}
-              onStop={() => {}}
             />
           </div>
         </div>
