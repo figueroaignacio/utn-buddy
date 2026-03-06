@@ -1,195 +1,110 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  addMessage as apiAddMessage,
-  generateResponseStream as apiGenerateStream,
-  getConversation,
-} from '../api/conversations.api';
-import type { Conversation, ConversationWithMessages, Message } from '../types';
+'use client';
+
+import { useChat } from '@ai-sdk/react';
+import { useQueryClient } from '@tanstack/react-query';
+import { DefaultChatTransport } from 'ai';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { getConversation } from '../api/conversations.api';
+import type { Conversation, Message } from '../types';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export function useConversation(conversationId: string) {
   const queryClient = useQueryClient();
-  const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
-  const generatingRef = useRef(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const hasLoadedRef = useRef(false);
+  const hasAutoSentRef = useRef(false);
 
-  const query = useQuery({
-    queryKey: ['conversation', conversationId],
-    queryFn: () => getConversation(conversationId),
-    enabled: !!conversationId,
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: `${API_URL}/api/conversations/${conversationId}/stream`,
+        credentials: 'include',
+      }),
+    [conversationId],
+  );
+
+  const {
+    messages: aiMessages,
+    status,
+    sendMessage: sendAIMessage,
+    setMessages,
+    stop,
+  } = useChat({
+    id: conversationId,
+    transport,
   });
 
-  const conversation = query.data;
+  const messages: Message[] = useMemo(() => {
+    return aiMessages.map(m => {
+      const content = m.parts
+        .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+        .map(p => p.text ?? '')
+        .join('');
 
-  const generateMutation = useMutation({
-    mutationFn: async () => {
-      setStreamingMessage('');
-
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      try {
-        const response = await apiGenerateStream(conversationId);
-
-        const reader = response.body?.getReader();
-        if (!reader) throw new Error('No reader available');
-
-        const decoder = new TextDecoder();
-        let done = false;
-        let accumulatedText = '';
-
-        while (!done) {
-          if (controller.signal.aborted) {
-            await reader.cancel();
-            break;
-          }
-
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-
-          if (value) {
-            const chunk = decoder.decode(value, { stream: true });
-            accumulatedText += chunk;
-            setStreamingMessage(accumulatedText);
-          }
-        }
-        return accumulatedText;
-      } finally {
-        abortControllerRef.current = null;
-      }
-    },
-    onSuccess: async finalText => {
-      // Optimistically update the cache with the full message to avoid "flash"
-      queryClient.setQueryData<ConversationWithMessages>(['conversation', conversationId], old => {
-        if (!old) return old;
-        const assistantMsg: Message = {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: finalText,
-          conversationId,
-          createdAt: new Date().toISOString(),
-        };
-        return {
-          ...old,
-          messages: [...(old.messages ?? []).filter(m => m.id !== 'streaming'), assistantMsg],
-        };
-      });
-
-      setStreamingMessage(null);
-      generatingRef.current = false;
-
-      // Invalidate in background
-      queryClient.invalidateQueries({ queryKey: ['conversation', conversationId] });
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    },
-    onError: () => {
-      setStreamingMessage(null);
-      generatingRef.current = false;
-      abortControllerRef.current = null;
-    },
-  });
-
-  const messages = useMemo(() => {
-    const baseMessages = conversation?.messages ?? [];
-    if (streamingMessage !== null) {
-      return [
-        ...baseMessages,
-        {
-          id: 'streaming',
-          role: 'assistant',
-          content: streamingMessage,
-          conversationId,
-          createdAt: new Date().toISOString(),
-        } as Message,
-      ];
-    }
-    return baseMessages;
-  }, [conversation, streamingMessage, conversationId]);
-
-  useEffect(() => {
-    if (!conversation) return;
-
-    if (conversation.id && conversation.title) {
-      queryClient.setQueryData<Conversation[]>(['conversations'], old =>
-        old?.map(c => (c.id === conversation.id ? { ...c, title: conversation.title! } : c)),
-      );
-    }
-
-    const isFirstUserMessage = messages.length === 1 && messages[0].role === 'user';
-    const isGenerateNotStarted =
-      generateMutation.isIdle && !generateMutation.isPending && !generateMutation.isSuccess;
-
-    if (
-      isFirstUserMessage &&
-      !query.isPlaceholderData &&
-      isGenerateNotStarted &&
-      !generatingRef.current
-    ) {
-      generatingRef.current = true;
-      generateMutation.mutate();
-    }
-  }, [
-    conversation,
-    conversationId,
-    messages,
-    query.isPlaceholderData,
-    queryClient,
-    generateMutation,
-  ]);
-
-  const addMessageMutation = useMutation({
-    mutationFn: (content: string) => apiAddMessage(conversationId, 'user', content),
-    onMutate: async content => {
-      await queryClient.cancelQueries({ queryKey: ['conversation', conversationId] });
-      const previousConversation = queryClient.getQueryData<ConversationWithMessages>([
-        'conversation',
-        conversationId,
-      ]);
-
-      const optimisticUserMsg: Message = {
-        id: crypto.randomUUID(),
-        role: 'user',
+      return {
+        id: m.id,
+        role: m.role as Message['role'],
         content,
         conversationId,
         createdAt: new Date().toISOString(),
       };
+    });
+  }, [aiMessages, conversationId]);
 
-      queryClient.setQueryData<ConversationWithMessages>(['conversation', conversationId], old => {
-        if (!old) return old;
-        return {
-          ...old,
-          messages: [...(old.messages ?? []), optimisticUserMsg],
-        };
-      });
+  useEffect(() => {
+    if (!conversationId || hasLoadedRef.current) return;
+    hasLoadedRef.current = true;
 
-      return { previousConversation };
-    },
-    onError: (_err, _content, context) => {
-      if (context?.previousConversation) {
-        queryClient.setQueryData(['conversation', conversationId], context.previousConversation);
+    getConversation(conversationId).then(conversation => {
+      if (conversation.title) {
+        queryClient.setQueryData<Conversation[]>(['conversations'], old =>
+          old?.map(c => (c.id === conversation.id ? { ...c, title: conversation.title! } : c)),
+        );
       }
-    },
-    onSuccess: () => {
-      setStreamingMessage('');
-      queryClient.invalidateQueries({ queryKey: ['conversation', conversationId] });
-      generatingRef.current = true;
-      generateMutation.reset();
-      generateMutation.mutate();
-    },
-  });
+
+      if (conversation.messages?.length > 0) {
+        const uiMessages = conversation.messages.map(msg => ({
+          id: msg.id,
+          role: msg.role as 'user' | 'assistant',
+          parts: [{ type: 'text' as const, text: msg.content }],
+        }));
+
+        setMessages(uiMessages);
+
+        const lastMsg = conversation.messages[conversation.messages.length - 1];
+        if (lastMsg.role === 'user' && !hasAutoSentRef.current) {
+          hasAutoSentRef.current = true;
+          setTimeout(() => {
+            sendAIMessage();
+          }, 100);
+        }
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId]);
+
+  useEffect(() => {
+    if (status === 'ready' && aiMessages.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    }
+  }, [status, aiMessages.length, queryClient]);
+
+  const isLoading = status === 'streaming' || status === 'submitted';
+  const isStreaming = status === 'streaming';
 
   const sendMessage = useCallback(
     async (content: string) => {
-      if (!content.trim() || addMessageMutation.isPending || generateMutation.isPending) return;
-      return addMessageMutation.mutateAsync(content);
+      if (!content.trim() || isLoading) return;
+      await sendAIMessage({ text: content.trim() });
     },
-    [addMessageMutation, generateMutation],
+    [isLoading, sendAIMessage],
   );
 
   return {
     messages,
-    isLoading: addMessageMutation.isPending || generateMutation.isPending,
-    isFetching: query.isLoading,
+    isLoading,
+    isStreaming,
     sendMessage,
+    stop,
   };
 }

@@ -11,24 +11,23 @@ interface ConversationPageProps {
 }
 
 export function ConversationPage({ id }: ConversationPageProps) {
-  const { messages, isLoading, isFetching, sendMessage } = useConversation(id);
+  const { messages, isLoading, isStreaming, sendMessage } = useConversation(id);
   const [input, setInput] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const streamingMsg = messages.find(m => m.id === 'streaming');
-  const isThinking = isLoading && (!streamingMsg || streamingMsg.content === '');
+
+  const lastMessage = messages[messages.length - 1];
+  const isThinking = isLoading && (!lastMessage || lastMessage.role === 'user');
 
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const behavior = streamingMsg ? 'auto' : 'smooth';
-
     container.scrollTo({
       top: container.scrollHeight,
-      behavior: behavior,
+      behavior: isStreaming ? 'auto' : 'smooth',
     });
-  }, [messages, isThinking, streamingMsg]);
+  }, [messages, isThinking, isStreaming]);
 
   const handleSubmit = async () => {
     const content = input.trim();
@@ -40,7 +39,7 @@ export function ConversationPage({ id }: ConversationPageProps) {
   return (
     <div className="flex flex-col h-full">
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        {isFetching && messages.length === 0 ? (
+        {messages.length === 0 && !isLoading ? (
           <ChatSkeleton key="skeleton" />
         ) : (
           <div
@@ -49,14 +48,28 @@ export function ConversationPage({ id }: ConversationPageProps) {
             aria-live="polite"
             aria-label="Chat messages"
           >
-            {messages.map(msg => (
+            {messages.map((msg, i) => {
+              const isMsgStreaming =
+                isStreaming && i === messages.length - 1 && msg.role === 'assistant';
+
+              return (
+                <ChatMessage
+                  key={msg.id}
+                  message={msg}
+                  isStreaming={isMsgStreaming}
+                  isThinking={isMsgStreaming && msg.content === ''}
+                />
+              );
+            })}
+
+            {isThinking && (
               <ChatMessage
-                key={msg.id}
-                message={{ id: msg.id, role: msg.role, content: msg.content }}
-                isStreaming={msg.id === 'streaming'}
-                isThinking={msg.id === 'streaming' && isThinking}
+                key="thinking"
+                message={{ id: 'thinking', role: 'assistant', content: '' }}
+                isStreaming={false}
+                isThinking={true}
               />
-            ))}
+            )}
 
             <div ref={bottomRef} className="h-4" />
           </div>

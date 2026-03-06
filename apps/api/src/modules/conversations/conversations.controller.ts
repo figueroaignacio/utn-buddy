@@ -57,9 +57,14 @@ export class ConversationsController {
   async generateStream(
     @CurrentUser() user: User,
     @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: { messages?: any[] },
     @Res() res: Response,
   ) {
-    const webResponse = await this.conversationsService.generateStreamResponse(id, user.id);
+    const webResponse = await this.conversationsService.generateStreamResponse(
+      id,
+      user.id,
+      body?.messages ?? [],
+    );
 
     res.setHeader('Content-Type', webResponse.headers.get('Content-Type') ?? 'text/plain');
     res.setHeader('Cache-Control', 'no-cache');

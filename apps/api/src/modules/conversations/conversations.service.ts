@@ -137,19 +137,38 @@ export class ConversationsService {
   async generateStreamResponse(
     conversationId: string,
     userId: string,
+    uiMessages: any[],
   ): Promise<globalThis.Response> {
     this.logger.log(`[generateStreamResponse] Started for ID: ${conversationId}, User: ${userId}`);
     const conversation = await this.findOne(conversationId, userId);
 
-    if (!conversation.messages || conversation.messages.length === 0) {
-      throw new NotFoundException('No messages found in this conversation');
-    }
+    if (uiMessages.length > 0) {
+      const lastMsg = uiMessages[uiMessages.length - 1];
+      if (lastMsg.role === 'user') {
+        const textContent =
+          typeof lastMsg.content === 'string'
+            ? lastMsg.content
+            : (lastMsg.parts
+                ?.filter((p: any) => p.type === 'text')
+                .map((p: any) => p.text)
+                .join('') ?? '');
 
-    const uiMessages = conversation.messages.map(msg => ({
-      id: msg.id,
-      role: msg.role as 'user' | 'assistant',
-      parts: [{ type: 'text' as const, text: msg.content }],
-    }));
+        if (textContent) {
+          const userMessage = this.messageRepo.create({
+            role: MessageRole.USER,
+            content: textContent,
+            conversationId,
+          });
+          await this.messageRepo.save(userMessage);
+
+          if (!conversation.title) {
+            this.generateAndSaveTitle(conversation, textContent);
+          }
+
+          await this.conversationRepo.update(conversationId, { updatedAt: new Date() });
+        }
+      }
+    }
 
     return createAgentUIStreamResponse({
       agent: nachaiAgent as any,
