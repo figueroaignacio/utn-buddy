@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { DefaultChatTransport } from 'ai';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { getConversation } from '../api/conversations.api';
+import { usePendingPromptStore } from '../store/pending-prompt.store';
 import type { Conversation, Message } from '../types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
@@ -12,7 +13,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 export function useConversation(conversationId: string) {
   const queryClient = useQueryClient();
   const hasLoadedRef = useRef(false);
-  const hasAutoSentRef = useRef(false);
+  const hasInitialSentRef = useRef(false);
+  const consumePendingPrompt = usePendingPromptStore(s => s.consumePendingPrompt);
 
   const transport = useMemo(
     () =>
@@ -70,14 +72,13 @@ export function useConversation(conversationId: string) {
         }));
 
         setMessages(uiMessages);
+      }
 
-        const lastMsg = conversation.messages[conversation.messages.length - 1];
-        if (lastMsg.role === 'user' && !hasAutoSentRef.current) {
-          hasAutoSentRef.current = true;
-          setTimeout(() => {
-            sendAIMessage();
-          }, 100);
-        }
+      // Consume pending prompt from store (set by ChatPage before redirect)
+      const pendingPrompt = consumePendingPrompt();
+      if (pendingPrompt && !hasInitialSentRef.current) {
+        hasInitialSentRef.current = true;
+        sendAIMessage({ text: pendingPrompt });
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
