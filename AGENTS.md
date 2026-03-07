@@ -1,193 +1,151 @@
-# AGENTS.md - Development Guide
+# AGENTS.md – Repo Operations Guide
+## 0. Purpose
+- Living handbook for all agentic contributors working inside this Turborepo.
+- Covers build/lint/test commands, style rules, and operational expectations.
+- Keep this file in sync with repo changes; update sections you touch.
 
-## Project Overview
+## 1. Monorepo Topology
+- Turborepo root with pnpm workspaces across apps and packages.
+- apps/web: Next.js 16 (React 19) client.
+- apps/api: NestJS 11 HTTP API.
+- packages/ui: shared React components + Tailwind tokens.
+- packages/eslint-config & packages/typescript-config: internal configs consumed elsewhere.
+- packages/ai: AI agent code.
 
-This is a Turborepo monorepo containing:
-- `apps/web` - Next.js 16 web application (React 19)
-- `apps/api` - NestJS backend API
-- `packages/ui` - Shared React component library
-- `packages/eslint-config` - ESLint configurations
-- `packages/typescript-config` - TypeScript configurations
+## 2. Toolchain & Prereqs
+- Node >= 18.x (LTS recommended) with pnpm 9 via corepack.
+- pnpm is the only supported package manager.
+- TypeScript strict mode with `noUncheckedIndexedAccess` and ES module output.
+- Git hooks may run lint/format; never skip them.
+- IDE, Docker, or scripts must respect workspace settings.
 
-## Build/Lint/Test Commands
+## 3. Root Automation Commands
+- `pnpm install` bootstraps workspaces; rerun after dependency changes.
+- `pnpm build` runs all package builds via Turbo.
+- `pnpm dev` runs every dev target concurrently (heavy).
+- `pnpm lint` + `pnpm check-types` gate submissions; run both before PRs.
+- `pnpm format` applies Prettier everywhere.
 
-### Root Commands (from monorepo root)
+## 4. Package-Specific Commands
+- apps/web: `pnpm dev` (Next dev), `pnpm build`, `pnpm start`, `pnpm lint`.
+- apps/api: `pnpm dev` (start:dev), `pnpm build`, `pnpm start`, `pnpm start:prod`.
+- packages/ui: `pnpm lint`, `pnpm check-types`.
+- Config packages rarely need direct commands beyond repository root tasks.
 
-```bash
-# Build all packages
-pnpm build
+## 5. Testing Strategy
+- No automated test runner currently configured; add Vitest + Testing Library when ready.
+- Co-locate specs with features (e.g., `apps/web/src/features/foo/__tests__`).
+- Recommended single-test command once Vitest exists: `pnpm vitest run path/to/file.test.ts`.
+- Document any new npm scripts for tests and update this file immediately.
+- Until tests arrive, emphasize type checking, linting, and manual QA flows.
 
-# Develop all packages
-pnpm dev
+## 6. Turbo Filtering & Targeted Tasks
+- Use `pnpm <task> --filter=<package>` to scope work (e.g., `pnpm build --filter=web`).
+- Depend on `--filter "...^..."` when you need dependency-closure builds.
+- Keep commands narrow during iteration to shorten feedback loops.
+- Cache artifacts live under `.turbo`; delete only if troubleshooting stale builds.
 
-# Lint all packages
-pnpm lint
+## 7. Day-to-Day Workflow
+- After cloning run `corepack enable` then `pnpm install`.
+- Use feature branches; avoid committing directly to main unless told otherwise.
+- Keep the worktree clean; never delete or overwrite user-owned changes.
+- Capture architectural decisions in README/comments near the change.
+- Prefer small, reviewable PRs with focused scope.
 
-# Check types across all packages
-pnpm check-types
+## 8. Formatting & Linting
+- Prettier: semicolons on, single quotes, width 100, tab width 2, trailing commas all, avoid arrow parens.
+- Run `pnpm format` for repo-wide fixes; do not hand-format.
+- ESLint extends Next, Nest, and internal configs; local overrides need lead approval.
+- Use `eslint-disable-next-line` only with short justification comments.
+- Align editorconfig/IDE formatters with Prettier to avoid diff churn.
 
-# Format code (Prettier)
-pnpm format
-```
+## 9. Import Organization
+- Order: external libs → `@repo/*` packages → app aliases (`@/*`) → relative paths.
+- Prefer named exports; keep default exports for Next.js route handlers only.
+- Avoid deep relative walks; create barrel files under `index.ts` when needed.
+- Place side-effect imports (styles/polyfills) at the top once per module.
 
-### App-Specific Commands
+## 10. Types & Naming
+- Explicitly type public function params/returns; allow inference only for local consts.
+- Replace potential `any` with `unknown` plus type guards.
+- Component/types/interfaces use PascalCase; variables/hooks/functions use camelCase.
+- Hooks must start with `use`; Zustand stores live under `store/<feature>`.
+- Files: kebab-case for React components/hooks, PascalCase for standalone type files, DTOs named `CreateXDto`.
 
-```bash
-# Web app (Next.js)
-cd apps/web
-pnpm dev          # Start development server
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm lint         # Run ESLint
+## 11. React & Component Patterns
+- Default to client components; add `'use client'` when using hooks or state.
+- Functional components only; add explicit return types for exported APIs.
+- Use `forwardRef` + `displayName` for primitives requiring refs.
+- Manage variants through `class-variance-authority` definitions exported alongside the component.
+- Keep effects deterministic; add dependencies and abort async work when race conditions are possible.
 
-# API app (NestJS)
-cd apps/api
-pnpm dev          # Start with hot reload
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm start:prod   # Start from built files
+## 12. State, Data, and Hooks
+- Scope Zustand stores per feature; never share mutable objects across slices directly.
+- Memoize derived state with `useMemo` and stabilize callbacks with `useCallback`.
+- House remote calls under `api/` modules; components import typed helpers instead of calling `fetch`.
+- Hooks live in `hooks/` folders and re-export through local `index.ts` barrels.
+- Prefer server actions or API routes over reaching into backend internals from the client.
 
-# UI Package
-cd packages/ui
-pnpm lint         # Run ESLint
-pnpm check-types  # Type check
-```
+## 13. Styling & UI System
+- Tailwind CSS v4 provides utility-first styling; extend tokens in `@repo/ui`.
+- Use the shared `cn` helper for conditional classes.
+- Favor component variants over ad-hoc class strings; keep CSS files tiny.
+- Animations rely on `motion/react` + `AnimatePresence`; share transition tokens in UI package.
+- Respect WCAG AA contrast, keyboard focus, and aria roles.
 
-### Running a Single Test
+## 14. Error Handling & Logging
+- Wrap async logic with try/catch; bubble actionable messages while logging stack context.
+- apps/api throws Nest exceptions (`BadRequestException`, `NotFoundException`, etc.) instead of generic errors.
+- apps/web renders explicit loading/error/empty states instead of crashing UI.
+- Never log secrets or tokens to the browser console; redact server logs when needed.
+- Validate payloads with class-validator DTOs before touching services.
 
-**Note:** This project does not currently have a test framework configured. Tests are not being run. If adding tests, use:
-- Vitest for unit tests (recommended for this stack)
-- Testing Library for React component testing
+## 15. Backend/API Patterns
+- Modules live under `apps/api/src/modules/<feature>` with controller/service/dto/entity folders.
+- Controllers stay slim; services encapsulate data access and business rules.
+- Leverage Nest dependency injection; never instantiate providers manually.
+- Use async/await plus `Promise.allSettled` for fan-out flows.
+- Mirror shared schemas/types into packages if multiple apps consume them.
 
-### Turbo Filtering
+## 16. File Organization & Naming
+- apps/web/src/app contains Next.js routes/layouts; keep page-level loaders/actions there.
+- apps/web/src/features/<feature>/[api|components|hooks|store|types] encapsulate feature logic.
+- apps/api/src/main.ts boots Nest; modules follow feature-first structure.
+- Shared UI lives in `packages/ui/src/components`; export via index barrels.
+- Config packages expose only tsconfig/eslint presets; avoid runtime logic.
 
-Use Turbo filters to run commands on specific packages:
-```bash
-pnpm build --filter=web
-pnpm lint --filter=api
-pnpm dev --filter=@repo/ui
-```
+## 17. Git & Review Discipline
+- Never rewrite history or force-push unless explicitly instructed.
+- Stage only relevant files; leave unrelated dirty changes untouched.
+- Follow conventional commit-style wording summarizing why the change exists.
+- Pull latest main before long branches and resolve conflicts locally.
+- Request reviews with lint/type checks green.
 
-## Code Style Guidelines
+## 18. Environment Variables & Secrets
+- apps/web: `.env.local` for machine-specific values; never commit.
+- apps/api: `.env` loaded by Nest config; provide `.env.example` if new keys appear.
+- Document required keys in feature README or module notes.
+- Rotate secrets in CI/CD promptly when onboarding new environments.
+- Avoid logging secrets; scrub tokens before analytics or metrics capture.
 
-### Formatting (Prettier)
+## 19. Tooling & Extensions
+- Align editors with workspace TypeScript via `"typescript.tsdk"` pointing to repo version.
+- Disable global ESLint/Prettier plugins that fight project settings.
+- No Cursor or Copilot rule files currently exist; add them under `.cursor/rules/` or `.github/copilot-instructions.md` and document changes here.
+- Prefer GitHub CLI (`gh`) for scripting PR/issue workflows.
+- Keep CI definitions aligned with commands documented above.
 
-- **Semicolons**: Yes
-- **Single quotes**: Yes
-- **Print width**: 100
-- **Tab width**: 2
-- **Trailing commas**: All
-- **Arrow parens**: Avoid
+## 20. Quick Checklist Before You Ship
+- `pnpm lint` (or filtered equivalent) passes.
+- `pnpm check-types` passes.
+- Critical flows manually smoke-tested in apps/web or Postman hits for apps/api.
+- Changelogs, READMEs, or AGENTS.md updated if behavior/contracts shift.
+- Reviewers can reproduce your work with documented commands.
 
-Run `pnpm format` to auto-format all code.
-
-### TypeScript
-
-- **Strict mode**: Enabled globally
-- **`noUncheckedIndexedAccess`**: Enabled - array access returns `T | undefined`
-- **Module system**: ESNext for Next.js, NodeNext for packages
-- **Always use explicit types** for function parameters and return types
-- **Avoid `any`** - use `unknown` if type is truly unknown
-
-### Imports
-
-- Use **path aliases** (`@/*` for apps/web):
-  ```typescript
-  import { useAuth } from '@/features/auth/hooks/use-auth';
-  import { Button } from '@repo/ui/button';
-  ```
-- **Group imports** in this order:
-  1. External libraries (React, Next.js, etc.)
-  2. Internal packages (`@repo/ui`, etc.)
-  3. Path alias imports (`@/features/...`)
-  4. Relative imports (`../`, `./`)
-- Use **named exports** over default exports for components
-
-### Naming Conventions
-
-- **Components**: PascalCase (`ChatPage`, `ButtonGroup`)
-- **Hooks**: camelCase with `use` prefix (`useConversations`, `useAuth`)
-- **Utilities/functions**: camelCase (`cn`, `createConversation`)
-- **Types/Interfaces**: PascalCase (`ButtonProps`, `Message`)
-- **Files**: kebab-case for components/hooks (`chat-page.tsx`), PascalCase for types (`User.ts`)
-
-### React Components
-
-- Use **client components** with `'use client'` directive at top
-- Use **functional components** with explicit return types when needed
-- Use `forwardRef` for components that need ref forwarding
-- Always set `displayName` for forwarded ref components
-- Use **CVA (class-variance-authority)** for component variants
-
-### State Management
-
-- Use **Zustand** for global state in the web app
-- Use local `useState` for component-level state
-- Use `useCallback` and `useMemo` for performance optimization
-
-### Styling
-
-- **Tailwind CSS v4** - use utility classes
-- Use `cn()` utility (from `@repo/ui/lib/cn`) for conditional class merging
-- Use `cva` for component variants
-
-### Error Handling
-
-- Use **try/catch** for async operations
-- Use appropriate **NestJS exceptions** in API (`NotFoundException`, `BadRequestException`, etc.)
-- Log errors appropriately (`console.error` in client code)
-- Return meaningful error messages to clients
-
-### Animations
-
-- Use **motion/react** for animations
-- Use `AnimatePresence` for exit animations
-- Define transitions consistently
-
-### ESLint Configuration
-
-- **apps/web**: Uses `eslint-config-next` with TypeScript support
-- **apps/api**: Uses `@typescript-eslint` with recommended rules
-- **packages/ui**: Uses `@repo/eslint-config/react-internal`
-
-Run `pnpm lint` before committing to catch issues.
-
-### File Organization
-
-```
-apps/web/src/
-  features/       # Feature-based organization
-    chat/
-      api/       # API calls
-      components/# Feature components
-      hooks/    # Feature hooks
-      store/    # Zustand stores
-      types/    # TypeScript types
-  lib/           # Shared utilities
-  app/           # Next.js app router pages
-
-apps/api/src/
-  modules/       # NestJS modules (feature-based)
-    users/
-      dto/      # Data Transfer Objects
-      entities/ # TypeORM entities
-```
-
-### Common Patterns
-
-- **API calls**: Separate API functions from components in `api/` folders
-- **Types**: Export from `index.ts` in types folder
-- **Components**: Co-locate types with component file or in separate `types/` folder
-- **Store**: Single Zustand store per feature domain
-
-## Environment Variables
-
-Create `.env` files as needed (never commit secrets):
-- `apps/web/.env.local` for Next.js
-- `apps/api/.env` for NestJS
-
-## Dependencies
-
-- **Package Manager**: pnpm v9.0.0
-- **Node**: >= 18
-- **Runtime**: React 19, Next.js 16, NestJS 11
+## 21. Documentation & Support
+- Keep feature READMEs current with domain-specific setup or decisions.
+- Update this AGENTS guide whenever workflows, commands, or tooling change materially.
+- Surface architectural rationales inside PR descriptions for reviewer context.
+- Use GitHub Discussions or issues to clarify open questions before coding major shifts.
+- Tag maintainers when work spans multiple packages to coordinate reviews.
+- Record manual QA steps or verification notes alongside code reviews for posterity.
