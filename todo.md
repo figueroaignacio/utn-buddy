@@ -1,600 +1,288 @@
-# E-commerce Tech Store — Product Roadmap & User Stories
+# UTN Buddy — TODO / User Stories
 
-Proyecto: **Tienda online de productos tecnológicos**
-Stack principal:
-
-- Frontend: Next.js + React + Tailwind
-- Backend: NestJS
-- Database: PostgreSQL
-- Pagos: Mercado Pago
-- Envíos: Andreani
-- IA: Vercel AI SDK + Groq
-- Bot: WhatsApp Business API
-
-Este documento define **todas las user stories del proyecto** para desarrollar el sistema **de forma incremental**, con buenas prácticas y **tests en frontend y backend**.
+> 🎯 Stack final
+> Monorepo pnpm powered by turborepo
+> Frontend: React + Vite + Tailwind + NachUI
+> Backend: NestJS
+> DB: Supabase (PostgreSQL)
+> ORM: Drizzle
+> Storage: Supabase Storage
+> IA: Vercel AI SDK + Gemini
+> Auth: OAuth manual (Google + GitHub) con NestJS o usar Better Auth // Me inclino por Better Auth
 
 ---
 
-# 1. Fase 0 — Setup del Proyecto
+# 🧱 MVP (PRIORIDAD MÁXIMA)
 
-Objetivo: tener una base sólida del proyecto.
+## 🔐 Auth (OAuth)
 
-## User Stories
+### 🔑 Login
 
-### US-0.1 — Crear repositorio del proyecto [x]
-
-**Como** desarrollador
-**Quiero** crear un repositorio base
-**Para** comenzar el desarrollo organizado.
-
-**Criterios de aceptación**
-
-- Repo inicializado
-- README base
-- Licencia
-- .gitignore
+- [ ] Como usuario, quiero iniciar sesión con Google
+- [ ] Como usuario, quiero iniciar sesión con GitHub
+- [ ] Como usuario, quiero ser redirigido correctamente después del login
 
 ---
 
-### US-0.2 — Crear estructura del monorepo [x]
+### ⚙️ Backend OAuth (NestJS)
 
-**Como** desarrollador
-**Quiero** separar frontend y backend
-**Para** mantener el proyecto organizado.
-
-```
-apps/
-  web/
-  api/
-
-packages/
-  ui/
-  config/
-```
+- [ ] Configurar Passport en NestJS
+- [ ] Implementar Google Strategy
+- [ ] Implementar GitHub Strategy
 
 ---
 
-### US-0.3 — Setup del Frontend [x]
+### 🔄 Flujo OAuth
 
-**Como** desarrollador
-**Quiero** crear la app de Next.js
-**Para** desarrollar la tienda.
+- [ ] Endpoint: GET /auth/google
+- [ ] Endpoint: GET /auth/google/callback
 
-Criterios:
-
-- Next.js instalado
-- Tailwind configurado
-- layout base
-- estructura inicial
+- [ ] Endpoint: GET /auth/github
+- [ ] Endpoint: GET /auth/github/callback
 
 ---
 
-### US-0.4 — Setup del Backend [x]
+### 🧠 Manejo de usuario
 
-**Como** desarrollador
-**Quiero** crear la API en NestJS
-**Para** manejar lógica del sistema.
-
-Criterios:
-
-- NestJS inicializado
-- conexión a PostgreSQL
-- estructura modular
+- [ ] Obtener datos del provider (email, name, avatar)
+- [ ] Verificar si el usuario existe en DB
+- [ ] Si no existe → crearlo con Drizzle
+- [ ] Si existe → reutilizar
 
 ---
 
-### US-0.5 — Configuración de base de datos
+### 🔐 Sesión / Tokens
 
-Tablas iniciales:
-
-```
-products
-categories
-orders
-order_items
-payments
-shipments
-```
+- [ ] Generar JWT propio en NestJS
+- [ ] Enviar JWT al frontend
+- [ ] Guardar token en frontend (cookie o localStorage)
 
 ---
 
-# 2. Fase 1 — Catálogo de Productos
+### 🛡️ Protección de rutas
 
-Objetivo: poder **mostrar productos en la tienda**.
-
----
-
-## US-1.1 — Crear modelo de producto
-
-**Como** administrador
-**Quiero** poder registrar productos
-**Para** venderlos en la tienda.
-
-Campos:
-
-```
-id
-name
-description
-price
-stock
-image
-category_id
-created_at
-```
+- [ ] Crear AuthGuard en NestJS
+- [ ] Validar JWT en cada request
+- [ ] Obtener user desde token
+- [ ] Inyectar user en request
 
 ---
 
-## US-1.2 — Endpoint para listar productos
+# 📊 Dashboard
 
-**Como** cliente
-**Quiero** ver los productos disponibles
-**Para** poder comprarlos.
-
-Endpoint:
-
-```
-GET /products
-```
+- [ ] Como usuario, quiero ver mis materias en un dashboard
+- [ ] Como usuario, quiero acceder rápidamente a cada materia
+- [ ] Como usuario, quiero ver actividad reciente
 
 ---
 
-## US-1.3 — Endpoint producto individual
+# 📚 Materias (Subjects)
 
-```
-GET /products/:slug
-```
-
----
-
-## US-1.4 — Mostrar productos en el frontend
-
-Página:
-
-```
-/products
-```
-
-Mostrar:
-
-- imagen
-- nombre
-- precio
-- botón ver producto
+- [ ] Como usuario, quiero crear una materia
+- [ ] Como usuario, quiero editar una materia
+- [ ] Como usuario, quiero eliminar una materia
+- [ ] Como usuario, quiero ver el detalle de una materia
 
 ---
 
-## US-1.5 — Página de producto
+## 🧠 Materias inteligentes
 
-Página:
-
-```
-/products/[slug]
-```
-
-Mostrar:
-
-- imagen
-- descripción
-- precio
-- stock
-- botón agregar al carrito
+- [ ] Detectar automáticamente tipo de materia
+- [ ] Clasificar como:
+  - teórica
+  - práctica
+  - mixta
 
 ---
 
-# 3. Fase 2 — Carrito de Compras
+# 📄 Archivos / Apuntes
 
-Objetivo: permitir **seleccionar productos antes del checkout**.
-
----
-
-## US-2.1 — Agregar producto al carrito
-
-**Como** cliente
-**Quiero** agregar productos al carrito
-**Para** comprarlos después.
-
-Estado del carrito en frontend:
-
-```
-cartItems
-quantity
-price
-```
+- [ ] Como usuario, quiero subir PDFs
+- [ ] Como usuario, quiero ver archivos por materia
+- [ ] Como usuario, quiero eliminar archivos
 
 ---
 
-## US-2.2 — Ver carrito
+## 📦 Supabase Storage
 
-Página:
-
-```
-/cart
-```
-
-Mostrar:
-
-- productos
-- cantidades
-- subtotal
+- [ ] Crear bucket
+- [ ] Subir archivos desde frontend
+- [ ] Guardar URL en DB
+- [ ] Restringir acceso por usuario
 
 ---
 
-## US-2.3 — Modificar cantidad
+# 🧠 Procesamiento de PDFs (MVP SIMPLE)
 
-El usuario puede:
+- [ ] Extraer texto del PDF (backend)
+- [ ] Limpiar texto
+- [ ] Guardar texto en DB
 
-- aumentar
-- disminuir
-- eliminar
+> ❗ MVP:
 
----
-
-## US-2.4 — Persistencia del carrito
-
-Opciones:
-
-- LocalStorage
-- cookie
+- [ ] NO usar embeddings todavía
 
 ---
 
-# 4. Fase 3 — Checkout
+# 🧠 Chat IA (CORE)
 
-Objetivo: poder **crear pedidos**.
-
----
-
-## US-3.1 — Formulario de checkout
-
-Campos:
-
-```
-nombre
-email
-telefono
-direccion
-ciudad
-codigo_postal
-```
+- [ ] Como usuario, quiero chatear con IA dentro de una materia
+- [ ] Como usuario, quiero que la IA use mis apuntes como contexto
+- [ ] Como usuario, quiero ver historial de mensajes
 
 ---
 
-## US-3.2 — Crear orden
+# 🤖 Backend IA (NestJS + Vercel AI SDK + Gemini)
 
-Endpoint:
-
-```
-POST /orders
-```
-
-Estados:
-
-```
-pending_payment
-paid
-shipped
-delivered
-```
+- [ ] Crear endpoint POST /chat
+- [ ] Integrar Vercel AI SDK
+- [ ] Configurar Gemini
+- [ ] Construir prompt con:
+  - contexto de materia
+  - contenido de PDFs
+- [ ] Enviar request a Gemini
+- [ ] Devolver respuesta
 
 ---
 
-## US-3.3 — Guardar productos del pedido
+# 💬 Persistencia de chat
 
-Tabla:
-
-```
-order_items
-```
+- [ ] Crear chat por materia
+- [ ] Guardar mensajes (user / assistant)
+- [ ] Recuperar historial
 
 ---
 
-# 5. Fase 4 — Pagos
+# 🔄 Flujo completo
 
-Objetivo: integrar pagos.
-
----
-
-## US-4.1 — Crear preferencia de pago
-
-Backend:
-
-```
-POST /payments/create
-```
-
-Devuelve:
-
-```
-checkout_url
-```
+- [ ] Frontend envía mensaje con JWT
+- [ ] Backend valida usuario
+- [ ] Backend obtiene:
+  - materia
+  - archivos
+- [ ] Backend construye contexto
+- [ ] IA responde
+- [ ] Se guarda mensaje
+- [ ] Se devuelve respuesta
 
 ---
 
-## US-4.2 — Redirigir a pago
+# 🧠 Base de datos (Drizzle)
 
-El frontend redirige al checkout.
+## Tablas
 
----
-
-## US-4.3 — Webhook de pago
-
-Endpoint:
-
-```
-POST /webhooks/mercadopago
-```
-
-Actualizar orden:
-
-```
-pending_payment → paid
-```
+- [ ] users
+- [ ] subjects
+- [ ] files
+- [ ] chats
+- [ ] messages
 
 ---
 
-# 6. Fase 5 — Envíos
+## 🧩 Usuarios (IMPORTANTE OAuth)
 
-Objetivo: integrar logística.
-
----
-
-## US-5.1 — Calcular costo de envío
-
-```
-POST /shipping/calculate
-```
-
-Datos:
-
-```
-postal_code
-cart_items
-```
+- [ ] Guardar:
+  - provider (google/github)
+  - provider_id
+  - email
+  - name
+  - avatar
 
 ---
 
-## US-5.2 — Generar envío
+## Relaciones
 
-Cuando el pago se confirma:
-
-```
-createShipment()
-```
-
-Guardar:
-
-```
-tracking_number
-```
+- [ ] user → subjects
+- [ ] subject → files
+- [ ] subject → chats
+- [ ] chat → messages
 
 ---
 
-## US-5.3 — Mostrar tracking
+# 🎨 Frontend (React + Vite + NachUI)
 
-Página:
+## Auth UI
 
-```
-/order/:id
-```
-
----
-
-# 7. Fase 6 — Panel de Administración
+- [ ] Botón "Login con Google"
+- [ ] Botón "Login con GitHub"
+- [ ] Manejar redirect después de login
+- [ ] Guardar JWT
 
 ---
 
-## US-6.1 — Login admin
+## Layout
 
-Solo para administración.
-
----
-
-## US-6.2 — CRUD de productos
-
-Panel:
-
-```
-/admin/products
-```
-
-Acciones:
-
-- crear
-- editar
-- eliminar
+- [ ] Sidebar
+- [ ] App shell
+- [ ] Routing
 
 ---
 
-## US-6.3 — Ver pedidos
+## 📊 Dashboard UI
 
-Panel:
-
-```
-/admin/orders
-```
-
-Mostrar:
-
-- estado
-- cliente
-- total
+- [ ] Grid de materias
+- [ ] Actividad reciente
 
 ---
 
-# 8. Fase 7 — Asistente de IA
+## 📚 Subjects UI
 
-Objetivo: mejorar conversión.
-
----
-
-## US-7.1 — Chat en la web
-
-Componente:
-
-```
-AIChat
-```
+- [ ] Lista de materias
+- [ ] Crear materia
+- [ ] Empty state
 
 ---
 
-## US-7.2 — IA consulta productos
+## 📄 Subject Detail
 
-Tools del agente:
-
-```
-searchProducts()
-getProduct()
-```
+- [ ] Layout:
+  - izquierda → archivos
+  - derecha → chat
 
 ---
 
-## US-7.3 — IA recomienda productos
+## 💬 Chat UI
 
-Ejemplo:
-
-```
-"Busco auriculares baratos"
-```
-
-Respuesta:
-
-- lista de productos
+- [ ] Lista de mensajes
+- [ ] Input fijo
+- [ ] Loading state
+- [ ] Error state
 
 ---
 
-# 9. Fase 8 — Bot de WhatsApp
+## 📄 Upload UI
+
+- [ ] Drag & drop
+- [ ] Lista de archivos
+- [ ] Estado de subida
 
 ---
 
-## US-8.1 — Recibir mensajes
+# 🚀 POST-MVP
 
-Webhook:
+## 🧠 IA avanzada
 
-```
-POST /whatsapp/webhook
-```
-
----
-
-## US-8.2 — IA responde preguntas
-
-Ejemplos:
-
-```
-¿Tenés cargadores?
-¿Cuánto cuesta el envío?
-```
+- [ ] Resúmenes
+- [ ] Preguntas tipo examen
+- [ ] Ejercicios
+- [ ] Explicaciones adaptativas
 
 ---
 
-## US-8.3 — Generar link de pago
+# 🏁 DEFINICIÓN DE DONE (MVP)
 
-El bot puede enviar:
-
-```
-link de MercadoPago
-```
-
----
-
-# 10. Fase 9 — Inteligencia de Negocio
+- [ ] Usuario loguea con Google o GitHub
+- [ ] JWT funcionando
+- [ ] Puede crear materias
+- [ ] Puede subir PDFs
+- [ ] Puede chatear con IA
+- [ ] IA responde con contexto básico
 
 ---
 
-## US-9.1 — Dashboard de ventas
+# 🧠 NOTAS IMPORTANTES
 
-Mostrar:
-
-- ventas del día
-- productos más vendidos
-
----
-
-## US-9.2 — Recomendador de productos con IA
-
-IA analiza:
-
-- ventas
-- tendencias
-
----
-
-## US-9.3 — Scraper de competencia
-
-Servicio que guarda:
-
-```
-competitor_products
-```
-
----
-
-# 11. Testing Strategy (se definirá luego)
-
-## Backend
-
-Tests:
-
-```
-unit tests
-integration tests
-e2e tests
-```
-
-Framework:
-
-```
-Jest
-```
-
----
-
-## Frontend
-
-Tests:
-
-```
-component tests
-ui tests
-e2e
-```
-
-Frameworks:
-
-```
-Vitest
-Playwright
-```
-
----
-
-# Roadmap Simplificado
-
-Orden recomendado de desarrollo:
-
-```
-1 Setup proyecto
-2 Catálogo
-3 Carrito
-4 Checkout
-5 Pagos
-6 Envíos
-7 Admin
-8 IA web
-9 Bot WhatsApp
-10 Analytics
-```
-
----
-
-# Visión Final
-
-El objetivo es construir una **tienda moderna con IA integrada**, donde:
-
-- la web vende productos
-- la IA recomienda productos
-- el bot de WhatsApp vende automáticamente
-- el sistema escala a futuro
-
-Esto crea una **plataforma de e-commerce automatizada con IA**.
+- OAuth solo para login (no passwords)
+- Backend genera JWT propio
+- No confiar en frontend nunca
+- Mantener simple el flujo de IA al inicio
