@@ -29,25 +29,25 @@ export const authenticatedProcedure = publicProcedure.use(({ ctx, next }) => {
 export const appRouter = router({
   health: publicProcedure.query(() => ({ status: 'ok', timestamp: new Date().toISOString() })),
   auth: router({
-    status: publicProcedure.query(() => ({} as { authenticated: boolean; user: User | null })),
-    logout: authenticatedProcedure.mutation(() => ({} as { success: boolean })),
+    status: publicProcedure.query(() => ({}) as { authenticated: boolean; user: User | null }),
+    logout: authenticatedProcedure.mutation(() => ({}) as { success: boolean }),
   }),
   users: router({
-    getMe: authenticatedProcedure.query(() => ({} as User)),
+    getMe: authenticatedProcedure.query(() => ({}) as User),
     findAll: authenticatedProcedure.query(() => [] as User[]),
-    findOne: authenticatedProcedure.input(z.object({ id: z.string() })).query(() => ({} as User)),
+    findOne: authenticatedProcedure.input(z.object({ id: z.string() })).query(() => ({}) as User),
   }),
   conversations: router({
     list: authenticatedProcedure.query(() => [] as Conversation[]),
     get: authenticatedProcedure
       .input(z.object({ id: z.string() }))
-      .query(() => ({} as ConversationWithMessages)),
+      .query(() => ({}) as ConversationWithMessages),
     create: authenticatedProcedure
       .input(z.object({ title: z.string().optional() }))
-      .mutation(() => ({} as Conversation)),
+      .mutation(() => ({}) as Conversation),
     delete: authenticatedProcedure
       .input(z.object({ id: z.string() }))
-      .mutation(() => ({} as { success: boolean })),
+      .mutation(() => ({}) as { success: boolean }),
   }),
 });
 

@@ -8,7 +8,7 @@ export function useConversations() {
   const { data: conversations = [], isLoading } = trpc.conversations.list.useQuery();
 
   const createMutation = trpc.conversations.create.useMutation({
-    onSuccess: (conversation) => {
+    onSuccess: conversation => {
       utils.conversations.list.setData(undefined, (old = []) => [conversation, ...old]);
       router.push(`/chat/c/${conversation.id}`);
     },
@@ -16,9 +16,7 @@ export function useConversations() {
 
   const deleteMutation = trpc.conversations.delete.useMutation({
     onSuccess: (_, { id }) => {
-      utils.conversations.list.setData(undefined, (old = []) =>
-        old.filter((c) => c.id !== id),
-      );
+      utils.conversations.list.setData(undefined, (old = []) => old.filter(c => c.id !== id));
       router.push('/chat');
     },
   });
