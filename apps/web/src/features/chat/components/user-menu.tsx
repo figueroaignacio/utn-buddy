@@ -9,13 +9,7 @@ import {
   UserCircle02Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownSeparator,
-} from '@repo/ui/components/dropdown-menu';
+import { DropdownMenu } from '@repo/ui/components/dropdown-menu';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
@@ -34,7 +28,7 @@ export function UserMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenu.Trigger asChild>
         <button
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full ring-2 ring-border hover:ring-primary/50 transition-all focus:outline-none"
           aria-label="User menu"
@@ -53,8 +47,8 @@ export function UserMenu() {
             </span>
           )}
         </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={10} className="w-72 rounded-xl">
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content align="end" sideOffset={10} className="w-72 rounded-xl">
         <div className="px-2 py-1.5 text-sm font-medium leading-none">
           <div className="flex items-center gap-2">
             {user.avatarUrl ? (
@@ -76,23 +70,23 @@ export function UserMenu() {
             </div>
           </div>
         </div>
-        <DropdownSeparator />
-        <DropdownMenuItem onSelect={() => router.push('/profile')}>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item onSelect={() => router.push('/profile')}>
           <HugeiconsIcon
             icon={UserCircle02Icon}
             size={15}
             className="mr-2.5 shrink-0 text-muted-foreground"
           />
           Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem>
+        </DropdownMenu.Item>
+        <DropdownMenu.Item>
           <HugeiconsIcon
             icon={HelpCircleIcon}
             size={15}
             className="mr-2.5 shrink-0 text-muted-foreground"
           />
           Help
-        </DropdownMenuItem>
+        </DropdownMenu.Item>
         <div className="flex items-center justify-between px-2 py-1.5">
           <div className="flex items-center">
             <HugeiconsIcon
@@ -104,12 +98,12 @@ export function UserMenu() {
           </div>
           <ThemeToggle />
         </div>
-        <DropdownSeparator />
-        <DropdownMenuItem variant="destructive" onSelect={logout}>
+        <DropdownMenu.Separator />
+        <DropdownMenu.Item variant="destructive" onSelect={logout}>
           <HugeiconsIcon icon={Logout01Icon} size={15} className="mr-2.5 shrink-0" />
           Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+        </DropdownMenu.Item>
+      </DropdownMenu.Content>
     </DropdownMenu>
   );
 }

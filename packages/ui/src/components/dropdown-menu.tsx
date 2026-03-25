@@ -100,12 +100,12 @@ function useClickOutside(
 
 // --- Components ---
 
-function DropdownMenu({
+const DropdownMenuRoot = ({
   children,
   className,
   defaultOpen = false,
   onOpenChange,
-}: DropdownMenuProps): React.JSX.Element {
+}: DropdownMenuProps): React.JSX.Element => {
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
@@ -145,18 +145,18 @@ function DropdownMenu({
   );
 
   return (
-    <DropdownContext.Provider value={contextValue}>
+    <DropdownContext value={contextValue}>
       <div className={cn('relative inline-block text-left', className)}>{children}</div>
-    </DropdownContext.Provider>
+    </DropdownContext>
   );
-}
+};
 
-function DropdownMenuTrigger({
+const DropdownMenuTrigger = ({
   children,
   onClick,
   className,
   asChild = false,
-}: DropdownMenuTriggerProps): React.JSX.Element {
+}: DropdownMenuTriggerProps): React.JSX.Element => {
   const { isOpen, toggleMenu, triggerRef, triggerId, contentId } = useDropdownContext();
   const shouldReduceMotion = useReducedMotion();
 
@@ -208,14 +208,14 @@ function DropdownMenuTrigger({
       </motion.span>
     </motion.button>
   );
-}
+};
 
-function DropdownMenuContent({
+const DropdownMenuContent = ({
   children,
   className,
   align = 'start',
   sideOffset = 6,
-}: DropdownMenuContentProps): React.JSX.Element | null {
+}: DropdownMenuContentProps): React.JSX.Element | null => {
   const { isOpen, closeMenu, contentId, triggerId, triggerRef } = useDropdownContext();
   const contentRef = React.useRef<HTMLDivElement>(null);
   const [position, setPosition] = React.useState<'bottom' | 'top'>('bottom');
@@ -325,9 +325,9 @@ function DropdownMenuContent({
       )}
     </AnimatePresence>
   );
-}
+};
 
-function DropdownMenuItem({
+const DropdownMenuItem = ({
   children,
   onClick,
   className,
@@ -335,7 +335,7 @@ function DropdownMenuItem({
   variant = 'default',
   onSelect,
   asChild = false,
-}: DropdownMenuItemProps): React.JSX.Element {
+}: DropdownMenuItemProps): React.JSX.Element => {
   const { closeMenu } = useDropdownContext();
 
   const handleClick = React.useCallback(
@@ -349,6 +349,28 @@ function DropdownMenuItem({
     [disabled, onClick, onSelect, closeMenu],
   );
 
+  const handleKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (disabled) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClick?.(e as any);
+        onSelect?.();
+        closeMenu();
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const next = e.currentTarget.nextElementSibling as HTMLElement;
+        if (next) next.focus();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prev = e.currentTarget.previousElementSibling as HTMLElement;
+        if (prev) prev.focus();
+      }
+    },
+    [disabled, onClick, onSelect, closeMenu],
+  );
+
   const style = {
     '--accent': variant === 'destructive' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(0,0,0, 0.04)',
   } as React.CSSProperties;
@@ -358,6 +380,7 @@ function DropdownMenuItem({
       role="menuitem"
       tabIndex={disabled ? -1 : 0}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       whileHover={!disabled ? { backgroundColor: 'var(--accent)', scale: 1 } : {}}
       whileTap={!disabled ? { scale: 0.98 } : {}}
       className={cn(
@@ -376,6 +399,9 @@ function DropdownMenuItem({
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       onClick: handleClick,
+      onKeyDown: handleKeyDown,
+      role: 'menuitem',
+      tabIndex: disabled ? -1 : 0,
       className: cn(
         'relative flex cursor-pointer items-center rounded-md px-3 py-2 text-sm outline-none select-none',
         'transition-colors duration-200',
@@ -389,28 +415,29 @@ function DropdownMenuItem({
   }
 
   return content;
-}
+};
 
-function DropdownLabel({ children }: { children: React.ReactNode }) {
+const DropdownLabel = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="text-muted-foreground px-3 py-2 text-xs font-semibold tracking-wider uppercase">
       {children}
     </div>
   );
-}
-
-function DropdownSeparator() {
-  return <div className="bg-border/50 my-1 h-px" />;
-}
-
-export {
-  DropdownLabel,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownSeparator,
 };
+
+const DropdownSeparator = () => {
+  return <div className="bg-border/50 my-1 h-px" />;
+};
+
+const DropdownMenu = Object.assign(DropdownMenuRoot, {
+  Trigger: DropdownMenuTrigger,
+  Content: DropdownMenuContent,
+  Item: DropdownMenuItem,
+  Label: DropdownLabel,
+  Separator: DropdownSeparator,
+});
+
+export { DropdownMenu };
 export type {
   DropdownMenuContentProps,
   DropdownMenuItemProps,

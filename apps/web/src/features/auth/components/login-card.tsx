@@ -3,13 +3,7 @@
 import { Logo } from '@/components/shared/logo';
 import { GitHubIcon, GoogleIcon } from '@/components/shared/tech-icons';
 import { Button } from '@repo/ui/components/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@repo/ui/components/card';
+import { Card } from '@repo/ui/components/card';
 import { useSearchParams } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { useAuth } from '../hooks/use-auth';
@@ -56,13 +50,13 @@ export function LoginCardInner({ showHeader = true }: LoginCardInnerProps) {
         </div>
       )}
       <Card className="border-border shadow-lg" variant="ghost">
-        <CardHeader className="pb-4 text-center">
-          <CardTitle className="text-base">Get started for free</CardTitle>
-          <CardDescription>
+        <Card.Header className="pb-4 text-center">
+          <Card.Title className="text-base">Get started for free</Card.Title>
+          <Card.Description>
             Connect your account and start generating components in seconds.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+          </Card.Description>
+        </Card.Header>
+        <Card.Content className="flex flex-col gap-4">
           {errorMessage && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {errorMessage}
@@ -99,7 +93,7 @@ export function LoginCardInner({ showHeader = true }: LoginCardInnerProps) {
             </span>
             .
           </p>
-        </CardContent>
+        </Card.Content>
       </Card>
     </div>
   );

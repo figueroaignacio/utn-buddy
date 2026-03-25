@@ -3,16 +3,7 @@
 import { Delete02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Button } from '@repo/ui/components/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@repo/ui/components/dialog';
+import { Dialog } from '@repo/ui/components/dialog';
 import { cn } from '@repo/ui/lib/cn';
 import Link from 'next/link';
 import { Conversation } from '../types';
@@ -51,7 +42,7 @@ export function SidebarConversationItem({
 
       <div className="absolute right-2 top-1/2 -translate-y-1/2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
         <Dialog>
-          <DialogTrigger asChild>
+          <Dialog.Trigger asChild>
             <button
               className="flex h-8 w-8 items-center justify-center text-muted-foreground hover:text-destructive transition-colors touch-manipulation"
               title="Delete conversation"
@@ -59,24 +50,24 @@ export function SidebarConversationItem({
             >
               <HugeiconsIcon icon={Delete02Icon} size={16} />
             </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Delete conversation</DialogTitle>
-              <DialogDescription>
+          </Dialog.Trigger>
+          <Dialog.Content className="max-w-md">
+            <Dialog.Header>
+              <Dialog.Title>Delete conversation</Dialog.Title>
+              <Dialog.Description>
                 Are you sure you want to delete{' '}
                 <span className="font-semibold text-foreground">
                   &quot;{chat.title ?? 'this conversation'}&quot;
                 </span>
                 ? This action cannot be undone.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="mt-4">
-              <DialogClose asChild>
+              </Dialog.Description>
+            </Dialog.Header>
+            <Dialog.Footer className="mt-4">
+              <Dialog.Close asChild>
                 <Button variant="ghost" size="sm">
                   Cancel
                 </Button>
-              </DialogClose>
+              </Dialog.Close>
               <Button
                 variant="destructive"
                 size="sm"
@@ -85,8 +76,8 @@ export function SidebarConversationItem({
               >
                 Delete
               </Button>
-            </DialogFooter>
-          </DialogContent>
+            </Dialog.Footer>
+          </Dialog.Content>
         </Dialog>
       </div>
     </div>
