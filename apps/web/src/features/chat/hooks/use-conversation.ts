@@ -1,17 +1,16 @@
 'use client';
 
+import { trpc } from '@/lib/trpc';
 import { useChat } from '@ai-sdk/react';
-import { useQueryClient } from '@tanstack/react-query';
 import { DefaultChatTransport } from 'ai';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { getConversation } from '../api/conversations.api';
 import { usePendingPromptStore } from '../store/pending-prompt.store';
-import type { Conversation, Message } from '../types';
+import type { Message } from '../types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
 
 export function useConversation(conversationId: string) {
-  const queryClient = useQueryClient();
+  const utils = trpc.useUtils();
   const hasLoadedRef = useRef(false);
   const hasInitialSentRef = useRef(false);
   const consumePendingPrompt = usePendingPromptStore(s => s.consumePendingPrompt);
@@ -53,42 +52,43 @@ export function useConversation(conversationId: string) {
     });
   }, [aiMessages, conversationId]);
 
+  const { data: conversation, isLoading: isInitialLoading } = trpc.conversations.get.useQuery(
+    { id: conversationId },
+    { enabled: !!conversationId },
+  );
+
   useEffect(() => {
-    if (!conversationId || hasLoadedRef.current) return;
-    hasLoadedRef.current = true;
+    const pendingPrompt = consumePendingPrompt();
+    if (pendingPrompt && !hasInitialSentRef.current) {
+      hasInitialSentRef.current = true;
+      sendAIMessage({ text: pendingPrompt });
+    }
 
-    getConversation(conversationId).then(conversation => {
-      if (conversation.title) {
-        queryClient.setQueryData<Conversation[]>(['conversations'], old =>
-          old?.map(c => (c.id === conversation.id ? { ...c, title: conversation.title! } : c)),
-        );
-      }
+    if (!conversation) return;
 
-      if (conversation.messages?.length > 0) {
-        const uiMessages = conversation.messages.map(msg => ({
-          id: msg.id,
-          role: msg.role as 'user' | 'assistant',
-          parts: [{ type: 'text' as const, text: msg.content }],
-        }));
+    if (conversation.title) {
+      utils.conversations.list.setData(undefined, old =>
+        old?.map(c => (c.id === conversation.id ? { ...c, title: conversation.title! } : c)),
+      );
+    }
 
-        setMessages(uiMessages);
-      }
+    if (conversation.messages?.length > 0 && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      const uiMessages = conversation.messages.map(msg => ({
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant',
+        parts: [{ type: 'text' as const, text: msg.content }],
+      }));
 
-      // Consume pending prompt from store (set by ChatPage before redirect)
-      const pendingPrompt = consumePendingPrompt();
-      if (pendingPrompt && !hasInitialSentRef.current) {
-        hasInitialSentRef.current = true;
-        sendAIMessage({ text: pendingPrompt });
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [conversationId]);
+      setMessages(uiMessages);
+    }
+  }, [conversation, setMessages, consumePendingPrompt, sendAIMessage, utils.conversations.list]);
 
   useEffect(() => {
     if (status === 'ready' && aiMessages.length > 0) {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      utils.conversations.list.invalidate();
     }
-  }, [status, aiMessages.length, queryClient]);
+  }, [status, aiMessages.length, utils.conversations.list]);
 
   const isLoading = status === 'streaming' || status === 'submitted';
   const isStreaming = status === 'streaming';
@@ -104,6 +104,7 @@ export function useConversation(conversationId: string) {
   return {
     messages,
     isLoading,
+    isInitialLoading,
     isStreaming,
     sendMessage,
     stop,

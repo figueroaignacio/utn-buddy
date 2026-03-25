@@ -1,12 +1,9 @@
 'use client';
 
 import { useAuth } from '@/features/auth/hooks/use-auth';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
-import { createConversation } from '../api/conversations.api';
+import { useConversations } from '../hooks/use-conversations';
 import { usePendingPromptStore } from '../store/pending-prompt.store';
-import type { Conversation } from '../types';
 import { ChatHero } from './chat-hero';
 import { ChatInput } from './chat-input';
 import { ChatSuggestions } from './chat-suggestions';
@@ -14,29 +11,20 @@ import { ChatSuggestions } from './chat-suggestions';
 export function ChatPage() {
   const { user } = useAuth();
   const [input, setInput] = useState('');
-  const queryClient = useQueryClient();
-  const router = useRouter();
+  const { createConversation, isLoading: isCreating } = useConversations();
   const setPendingPrompt = usePendingPromptStore(s => s.setPendingPrompt);
-
-  const startChatMutation = useMutation({
-    mutationFn: async () => {
-      const conversation = await createConversation();
-      queryClient.setQueryData<Conversation[]>(['conversations'], old =>
-        old ? [conversation, ...old] : [conversation],
-      );
-      return conversation;
-    },
-    onSuccess: conversation => {
-      setPendingPrompt(input.trim());
-      router.push(`/chat/c/${conversation.id}`);
-    },
-  });
 
   const handleSubmit = useCallback(async () => {
     const content = input.trim();
-    if (!content || startChatMutation.isPending) return;
-    startChatMutation.mutate();
-  }, [input, startChatMutation]);
+    if (!content || isCreating) return;
+
+    try {
+      setPendingPrompt(content);
+      await createConversation();
+    } catch (error) {
+      console.error('Failed to create conversation:', error);
+    }
+  }, [input, isCreating, createConversation, setPendingPrompt]);
 
   return (
     <div className="flex flex-col h-full">
@@ -48,7 +36,7 @@ export function ChatPage() {
               value={input}
               onChange={setInput}
               onSubmit={handleSubmit}
-              isLoading={startChatMutation.isPending}
+              isLoading={isCreating}
             />
           </div>
           <ChatSuggestions onSelect={setInput} />

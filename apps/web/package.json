@@ -6,14 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "check-types": "tsc --noEmit",
     "lint": "eslint"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.139",
     "@hugeicons/core-free-icons": "^4.0.0",
     "@hugeicons/react": "^1.1.6",
+    "@repo/trpc": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.95.2",
+    "@trpc/client": "^11.0.0-rc.820",
+    "@trpc/react-query": "^11.0.0-rc.820",
     "ai": "^6.0.137",
     "highlight.js": "^11.11.1",
     "lucide-react": "^1.0.1",

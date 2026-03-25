@@ -1,12 +1,5 @@
-export interface User {
-  id: string;
-  username: string;
-  email: string | null;
-  avatarUrl: string | null;
-  bio: string | null;
-  location: string | null;
-  profileUrl: string | null;
-  createdAt: string;
-}
+import { User as TrpcUser } from '@repo/trpc';
+
+export type User = TrpcUser;
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';

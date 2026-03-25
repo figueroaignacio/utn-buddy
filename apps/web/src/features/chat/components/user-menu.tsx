@@ -27,7 +27,7 @@ export function UserMenu() {
 
   const initials = user.username
     .split(/[\s_-]/)
-    .map(w => w[0])
+    .map((w: string) => w[0])
     .join('')
     .slice(0, 2)
     .toUpperCase();

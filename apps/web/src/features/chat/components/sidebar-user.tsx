@@ -26,7 +26,7 @@ export function SidebarUser({ collapsed }: SidebarUserProps) {
     if (!user) return '';
     return user.username
       .split(/[\s_-]/)
-      .map(w => w[0])
+      .map((w: string) => w[0])
       .join('')
       .slice(0, 2)
       .toUpperCase();

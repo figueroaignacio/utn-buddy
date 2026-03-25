@@ -1,9 +1,12 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import * as cookieParser from 'cookie-parser';
+import { JwtService } from '@nestjs/jwt';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { TrpcRouter } from './modules/trpc/trpc.router';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,6 +27,27 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+    }),
+  );
+
+  const trpcRouter = app.get(TrpcRouter);
+  const jwtService = app.get(JwtService);
+
+  app.use(
+    '/api/trpc',
+    createExpressMiddleware({
+      router: trpcRouter.appRouter,
+      createContext: ({ req, res }) => {
+        const token = req.cookies?.access_token;
+        let user;
+        if (token) {
+          try {
+            const payload = jwtService.verify(token);
+            user = { id: payload.sub, username: payload.username };
+          } catch {}
+        }
+        return { req, res, user };
+      },
     }),
   );
 

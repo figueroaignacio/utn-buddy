@@ -11,7 +11,7 @@ interface ConversationPageProps {
 }
 
 export function ConversationPage({ id }: ConversationPageProps) {
-  const { messages, isLoading, isStreaming, sendMessage } = useConversation(id);
+  const { messages, isLoading, isInitialLoading, isStreaming, sendMessage } = useConversation(id);
   const [input, setInput] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -39,7 +39,7 @@ export function ConversationPage({ id }: ConversationPageProps) {
   return (
     <div className="flex flex-col h-full">
       <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-        {messages.length === 0 && !isLoading ? (
+        {isInitialLoading ? (
           <ChatSkeleton key="skeleton" />
         ) : (
           <div

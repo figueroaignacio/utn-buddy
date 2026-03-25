@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { Conversation } from './modules/conversations/entities/conversation.entity';
 import { Message } from './modules/conversations/entities/message.entity';
+import { TrpcModule } from './modules/trpc/trpc.module';
 import { User } from './modules/users/entities/user.entity';
 import { UsersModule } from './modules/users/users.module';
 
@@ -32,6 +33,7 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     AuthModule,
     ConversationsModule,
+    TrpcModule,
   ],
   controllers: [AppController],
   providers: [AppService],

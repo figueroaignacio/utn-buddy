@@ -1,14 +1,14 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "type": "module",
-  "description": "Backend for CommitCode Platform",
+  "description": "Backend for NachAI",
   "scripts": {
     "build": "nest build",
     "start": "nest start",
     "dev": "nest start --watch",
     "start:prod": "node dist/main",
     "lint": "eslint .",
+    "check-types": "tsc --noEmit",
     "typeorm": "typeorm-ts-node-commonjs"
   },
   "dependencies": {
@@ -21,6 +21,9 @@
     "@nestjs/platform-express": "^11.1.17",
     "@nestjs/typeorm": "^11.0.0",
     "@repo/ai": "workspace:*",
+    "@repo/trpc": "workspace:*",
+    "@trpc/server": "^11.0.0-rc.820",
+    "zod": "^3.24.2",
     "@types/passport-google-oauth20": "^2.0.17",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",

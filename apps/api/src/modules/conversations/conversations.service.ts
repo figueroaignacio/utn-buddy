@@ -125,7 +125,7 @@ export class ConversationsService {
       await this.conversationRepo.update(conversationId, { updatedAt: new Date() });
 
       return saved;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(
         `[generateResponse] ERROR in generateResponse: ${error.message}`,
         error.stack,

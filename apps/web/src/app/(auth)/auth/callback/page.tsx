@@ -1,20 +1,22 @@
 'use client';
 
-import { getAuthStatus } from '@/features/auth/api/auth.api';
 import { useAuthStore } from '@/features/auth/store/auth.store';
+import { trpc } from '@/lib/trpc';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const { setUser, clearAuth } = useAuthStore();
+  const trpcContext = trpc.useUtils();
   const called = useRef(false);
 
   useEffect(() => {
     if (called.current) return;
     called.current = true;
 
-    getAuthStatus()
+    trpcContext.auth.status
+      .fetch()
       .then(({ authenticated, user }) => {
         if (authenticated && user) {
           setUser(user);
@@ -28,7 +30,7 @@ export default function AuthCallbackPage() {
         clearAuth();
         router.replace('/login?error=OAuthCallback');
       });
-  }, [router, setUser, clearAuth]);
+  }, [router, setUser, clearAuth, trpcContext]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
