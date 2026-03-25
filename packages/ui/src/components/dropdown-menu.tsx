@@ -438,6 +438,7 @@ const DropdownMenu = Object.assign(DropdownMenuRoot, {
 });
 
 export { DropdownMenu };
+
 export type {
   DropdownMenuContentProps,
   DropdownMenuItemProps,

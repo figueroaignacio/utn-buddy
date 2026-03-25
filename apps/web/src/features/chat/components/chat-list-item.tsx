@@ -3,16 +3,7 @@
 import { Calendar01Icon, Delete02Icon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Button } from '@repo/ui/components/button';
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@repo/ui/components/dialog';
+import { Dialog } from '@repo/ui/components/dialog';
 import Link from 'next/link';
 import type { Conversation } from '../types';
 
@@ -44,7 +35,7 @@ export function ChatListItem({ chat, onDelete, isDeleting }: ChatListItemProps) 
       </Link>
       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <Dialog>
-          <DialogTrigger asChild>
+          <Dialog.Trigger asChild>
             <button
               className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
               title="Delete"
@@ -52,24 +43,24 @@ export function ChatListItem({ chat, onDelete, isDeleting }: ChatListItemProps) 
             >
               <HugeiconsIcon icon={Delete02Icon} size={16} />
             </button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Delete conversation</DialogTitle>
-              <DialogDescription>
+          </Dialog.Trigger>
+          <Dialog.Content className="max-w-md">
+            <Dialog.Header>
+              <Dialog.Title>Delete conversation</Dialog.Title>
+              <Dialog.Description>
                 Are you sure you want to delete &quot;
                 <span className="font-semibold text-foreground">
                   {chat.title ?? 'this conversation'}
                 </span>
                 &quot;?
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="mt-4">
-              <DialogClose asChild>
+              </Dialog.Description>
+            </Dialog.Header>
+            <Dialog.Footer className="mt-4">
+              <Dialog.Close asChild>
                 <Button variant="ghost" size="sm">
                   Cancel
                 </Button>
-              </DialogClose>
+              </Dialog.Close>
               <Button
                 variant="destructive"
                 size="sm"
@@ -78,8 +69,8 @@ export function ChatListItem({ chat, onDelete, isDeleting }: ChatListItemProps) 
               >
                 Delete
               </Button>
-            </DialogFooter>
-          </DialogContent>
+            </Dialog.Footer>
+          </Dialog.Content>
         </Dialog>
       </div>
     </div>

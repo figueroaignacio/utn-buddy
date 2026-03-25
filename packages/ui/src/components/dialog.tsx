@@ -313,4 +313,16 @@ const Dialog = Object.assign(DialogRoot, {
   Description: DialogDescription,
 });
 
-export { Dialog };
+export {
+  Dialog,
+  DialogRoot,
+  DialogTrigger,
+  DialogPortal,
+  DialogClose,
+  DialogOverlay,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+};
