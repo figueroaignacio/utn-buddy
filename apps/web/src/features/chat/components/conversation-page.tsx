@@ -3,21 +3,85 @@
 import { ChatInput } from '@/features/chat/components/chat-input';
 import { ChatMessage } from '@/features/chat/components/chat-message';
 import { ChatSkeleton } from '@/features/chat/components/chat-skeleton';
-import { useConversation } from '@/features/chat/hooks/use-conversation';
-import { useEffect, useRef, useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { usePendingPromptStore } from '../store/pending-prompt.store';
 
 interface ConversationPageProps {
   id: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+
 export function ConversationPage({ id }: ConversationPageProps) {
-  const { messages, isLoading, isInitialLoading, isStreaming, sendMessage } = useConversation(id);
+  const utils = trpc.useUtils();
+  const hasLoadedRef = useRef(false);
+  const hasInitialSentRef = useRef(false);
+  const consumePendingPrompt = usePendingPromptStore(s => s.consumePendingPrompt);
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: `${API_URL}/api/conversations/${id}/stream`,
+        credentials: 'include',
+      }),
+    [id],
+  );
+
+  const {
+    messages,
+    status,
+    sendMessage: sendAIMessage,
+    setMessages,
+    stop,
+  } = useChat({
+    id,
+    transport,
+    onFinish: () => {
+      utils.conversations.list.invalidate();
+    },
+  });
+
+  const { data: conversation, isLoading: isInitialLoading } = trpc.conversations.get.useQuery(
+    { id },
+    { enabled: !!id },
+  );
+
   const [input, setInput] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const lastMessage = messages[messages.length - 1];
-  const isThinking = isLoading && (!lastMessage || lastMessage.role === 'user');
+  const isLoading = status === 'streaming' || status === 'submitted';
+  const isStreaming = status === 'streaming';
+
+  useEffect(() => {
+    const pendingPrompt = consumePendingPrompt();
+    if (pendingPrompt && !hasInitialSentRef.current) {
+      hasInitialSentRef.current = true;
+      sendAIMessage({ text: pendingPrompt });
+    }
+
+    if (!conversation) return;
+
+    if (conversation.title) {
+      utils.conversations.list.setData(undefined, old =>
+        old?.map(c => (c.id === conversation.id ? { ...c, title: conversation.title! } : c)),
+      );
+    }
+
+    if (conversation.messages?.length > 0 && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
+      const uiMessages = conversation.messages.map(msg => ({
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant',
+        parts: [{ type: 'text' as const, text: msg.content }],
+      }));
+
+      setMessages(uiMessages);
+    }
+  }, [conversation, setMessages, consumePendingPrompt, sendAIMessage, utils.conversations.list]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -27,13 +91,13 @@ export function ConversationPage({ id }: ConversationPageProps) {
       top: container.scrollHeight,
       behavior: isStreaming ? 'auto' : 'smooth',
     });
-  }, [messages, isThinking, isStreaming]);
+  }, [messages, isStreaming]);
 
   const handleSubmit = async () => {
     const content = input.trim();
     if (!content || isLoading) return;
     setInput('');
-    await sendMessage(content);
+    await sendAIMessage({ text: content });
   };
 
   return (
@@ -49,27 +113,10 @@ export function ConversationPage({ id }: ConversationPageProps) {
             aria-label="Chat messages"
           >
             {messages.map((msg, i) => {
-              const isMsgStreaming =
-                isStreaming && i === messages.length - 1 && msg.role === 'assistant';
+              const isMsgStreaming = isStreaming && i === messages.length - 1;
 
-              return (
-                <ChatMessage
-                  key={msg.id}
-                  message={msg}
-                  isStreaming={isMsgStreaming}
-                  isThinking={isMsgStreaming && msg.content === ''}
-                />
-              );
+              return <ChatMessage key={msg.id} message={msg} isStreaming={isMsgStreaming} />;
             })}
-
-            {isThinking && (
-              <ChatMessage
-                key="thinking"
-                message={{ id: 'thinking', role: 'assistant', content: '' }}
-                isStreaming={false}
-                isThinking={true}
-              />
-            )}
 
             <div ref={bottomRef} className="h-4" />
           </div>
@@ -81,6 +128,7 @@ export function ConversationPage({ id }: ConversationPageProps) {
             value={input}
             onChange={setInput}
             onSubmit={handleSubmit}
+            onStop={stop}
             isLoading={isLoading}
           />
         </div>

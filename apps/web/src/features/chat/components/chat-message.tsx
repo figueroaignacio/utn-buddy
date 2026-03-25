@@ -2,21 +2,19 @@
 
 import { cn } from '@repo/ui/lib/cn';
 import { MarkdownRenderer } from './markdown-renderer';
-
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-}
+import type { UIMessage } from '@ai-sdk/react';
 
 interface ChatMessageProps {
-  message: Message;
+  message: UIMessage;
   isStreaming?: boolean;
-  isThinking?: boolean;
 }
 
-export function ChatMessage({ message, isStreaming, isThinking }: ChatMessageProps) {
+export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
   const isUser = message.role === 'user';
+  const content = message.parts
+    .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+    .map(p => p.text)
+    .join('');
 
   return (
     <div className={cn('flex gap-3 w-full items-start', isUser ? 'justify-end' : 'justify-start')}>
@@ -28,18 +26,7 @@ export function ChatMessage({ message, isStreaming, isThinking }: ChatMessagePro
             : 'text-foreground px-0',
         )}
       >
-        {isThinking ? (
-          <div className="flex items-center gap-1 py-1 text-muted-foreground">
-            <div className="flex items-center gap-[3px] mr-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse [animation-delay:200ms]" />
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse [animation-delay:400ms]" />
-            </div>
-            <span className="text-sm font-medium animate-pulse">Thinking...</span>
-          </div>
-        ) : (
-          <MarkdownRenderer content={message.content} isStreaming={isStreaming} />
-        )}
+        <MarkdownRenderer content={content} isStreaming={isStreaming} />
       </div>
     </div>
   );

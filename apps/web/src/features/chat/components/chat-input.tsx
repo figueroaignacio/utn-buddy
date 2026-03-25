@@ -9,6 +9,7 @@ export interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
+  onStop?: () => void;
   isLoading?: boolean;
   placeholder?: string;
 }
@@ -17,6 +18,7 @@ export function ChatInput({
   value,
   onChange,
   onSubmit,
+  onStop,
   isLoading = false,
   placeholder = 'Ask NachAI to generate a component…',
 }: ChatInputProps) {
@@ -56,11 +58,11 @@ export function ChatInput({
           {isLoading ? (
             <button
               type="button"
-              title="Loading generation"
-              disabled
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors animate-spin"
+              title="Stop generation"
+              onClick={onStop}
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background hover:bg-foreground/80 transition-colors"
             >
-              <HugeiconsIcon icon={Loading03Icon} size={14} />
+              <HugeiconsIcon icon={Loading03Icon} size={14} className="animate-spin" />
             </button>
           ) : (
             <button
