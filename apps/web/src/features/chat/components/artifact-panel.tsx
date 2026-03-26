@@ -2,88 +2,116 @@
 
 import { useArtifactStore } from '@/features/chat/store/artifact.store';
 import { SandpackLayout, SandpackPreview, SandpackProvider } from '@codesandbox/sandpack-react';
-import { Cancel01Icon, CodeIcon, ViewIcon } from '@hugeicons/core-free-icons';
+import {
+  Cancel01Icon,
+  CheckmarkCircle02Icon,
+  CodeIcon,
+  Copy01Icon,
+  ViewIcon,
+} from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { cn } from '@repo/ui/lib/cn';
-import { AnimatePresence, motion } from 'motion/react';
+import { useState } from 'react';
 import { CodeBlock } from './code-block';
 
 export function ArtifactPanel() {
   const { isOpen, activeTab, component, closeArtifact, setActiveTab } = useArtifactStore();
+  const [copied, setCopied] = useState(false);
 
   if (!component) return null;
 
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(component.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy code:', err);
+    }
+  };
+
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <>
-          {/* Mobile Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+        <div className="contents">
+          <div
             onClick={closeArtifact}
             className="md:hidden fixed inset-0 z-40 bg-background/80 backdrop-blur-xs"
           />
-
-          <motion.div
-            initial={{ opacity: 0, x: '100%' }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: '100%' }}
-            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+          <div
             className={cn(
-              'fixed inset-y-0 right-0 z-50 flex flex-col glass-panel shadow-2xl',
-              'w-full md:relative md:inset-auto md:z-0 md:w-[55%] xl:w-[65%] md:shadow-2xl',
+              'fixed inset-y-0 right-0 z-50 flex flex-col bg-secondary shadow-2xl transition-all duration-300',
+              'w-full md:relative md:inset-auto md:z-0 md:w-[50%] xl:w-[50%] md:shadow-2xl',
               'rounded-none md:rounded-2xl my-0 md:my-4 mr-0 md:mr-4 ml-0',
-              'h-full md:h-[calc(100vh-2rem)] border-l border-white/5 md:border',
+              'h-full md:h-[calc(100vh-2rem)] border-l border-white/5 md:border backdrop-blur-xl overflow-hidden',
             )}
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-border px-4 h-16">
-              <div className="flex items-center gap-3">
-                <div className="overflow-hidden">
-                  <h3 className="font-heading text-sm font-semibold text-foreground truncate">
-                    {component.name}
-                  </h3>
+            <div className="flex shrink-0 items-center justify-between border-b border-white/5 px-4 h-14 bg-secondary">
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div className="flex px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20 shrink-0">
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                    TSX
+                  </span>
                 </div>
+                <h3 className="font-heading text-sm font-semibold text-foreground truncate max-w-[120px] md:max-w-[200px]">
+                  {component.name}
+                </h3>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center rounded-lg bg-black p-1 border border-border/50">
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center rounded-lg bg-background/50 p-1 border border-white/5 ring-1 ring-white/5">
                   <button
                     onClick={() => setActiveTab('preview')}
                     className={cn(
                       'flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
                       activeTab === 'preview'
-                        ? 'bg-secondary text-foreground shadow-xs'
+                        ? 'bg-secondary text-foreground shadow-sm ring-1 ring-white/5'
                         : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
                     )}
                   >
                     <HugeiconsIcon icon={ViewIcon} size={14} />
-                    Preview
+                    <span className="hidden sm:inline">Preview</span>
                   </button>
                   <button
                     onClick={() => setActiveTab('code')}
                     className={cn(
                       'flex items-center gap-2 rounded-md px-3 py-1.5 text-xs font-medium transition-all',
                       activeTab === 'code'
-                        ? 'bg-secondary text-foreground shadow-xs'
+                        ? 'bg-secondary text-foreground shadow-sm ring-1 ring-white/5'
                         : 'text-muted-foreground hover:text-foreground hover:bg-white/5',
                     )}
                   >
                     <HugeiconsIcon icon={CodeIcon} size={14} />
-                    Code
+                    <span className="hidden sm:inline">Code</span>
                   </button>
                 </div>
-                <div className="h-4 w-px bg-border/50 mx-1" />
-                <button
-                  onClick={closeArtifact}
-                  className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
-                  aria-label="Close"
-                >
-                  <HugeiconsIcon icon={Cancel01Icon} size={18} />
-                </button>
+
+                <div className="h-4 w-px bg-white/10 mx-1.5" />
+
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={copyToClipboard}
+                    className={cn(
+                      'flex h-9 w-9 items-center justify-center rounded-lg transition-all',
+                      copied
+                        ? 'bg-success/10 text-success'
+                        : 'text-muted-foreground hover:bg-white/5 hover:text-foreground',
+                    )}
+                    title="Copy code"
+                  >
+                    <HugeiconsIcon icon={copied ? CheckmarkCircle02Icon : Copy01Icon} size={18} />
+                  </button>
+
+                  <button
+                    onClick={closeArtifact}
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all"
+                    aria-label="Close"
+                  >
+                    <HugeiconsIcon icon={Cancel01Icon} size={20} />
+                  </button>
+                </div>
               </div>
             </div>
-            <div className="flex-1 overflow-hidden relative bg-secondary">
+            <div className="flex-1 overflow-hidden relative">
               {activeTab === 'preview' ? (
                 <SandpackProvider
                   template="react-ts"
@@ -97,7 +125,6 @@ export function ArtifactPanel() {
                       return twMerge(clsx(inputs));
                     }
                   `,
-                    // Auto-inject Tailwind CDN for the preview
                     '/public/index.html': `
                     <!DOCTYPE html>
                     <html lang="en">
@@ -143,16 +170,22 @@ export function ArtifactPanel() {
                   </SandpackLayout>
                 </SandpackProvider>
               ) : (
-                <div className="h-full overflow-y-auto p-4 custom-scrollbar">
-                  <CodeBlock language="tsx" value={component.code}>
+                <div className="h-full overflow-hidden bg-black/20 ">
+                  <CodeBlock
+                    language="tsx"
+                    value={component.code}
+                    hideHeader
+                    className="h-full rounded-none border-none"
+                    containerClassName="h-full"
+                  >
                     {component.code}
                   </CodeBlock>
                 </div>
               )}
             </div>
-          </motion.div>
-        </>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

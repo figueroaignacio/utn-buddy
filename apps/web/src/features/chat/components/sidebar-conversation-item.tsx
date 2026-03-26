@@ -33,8 +33,8 @@ export function SidebarConversationItem({
         className={cn(
           'flex items-center gap-2.5 w-full rounded-lg px-2 py-2 pr-10 text-sm transition-colors text-left',
           isActive
-            ? 'bg-card text-foreground font-medium'
-            : 'text-muted-foreground hover:bg-card hover:text-foreground',
+            ? 'bg-background/60 text-foreground font-medium shadow-sm'
+            : 'text-muted-foreground hover:bg-background/40 hover:text-foreground',
         )}
       >
         <span className="truncate">{chat.title ?? 'New chat'}</span>

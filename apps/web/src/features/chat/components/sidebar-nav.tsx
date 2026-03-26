@@ -48,7 +48,7 @@ export function SidebarNav({ collapsed, onAction }: SidebarNavProps) {
             aria-current={isActive ? 'page' : undefined}
             className={cn(
               'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors group',
-              isActive ? 'bg-card' : 'hover:bg-card text-muted-foreground hover:text-foreground',
+              isActive ? 'bg-background/60 text-foreground font-semibold shadow-sm' : 'hover:bg-background/40 text-muted-foreground hover:text-foreground',
               collapsed && 'justify-center px-0',
             )}
           >

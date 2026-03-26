@@ -19,7 +19,7 @@ export function SidebarHeader({ collapsed, onToggle }: SidebarHeaderProps) {
     >
       <button
         onClick={onToggle}
-        className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+        className="flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-background/40 hover:text-foreground transition-all"
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         <HugeiconsIcon icon={PanelRightIcon} size={20} />

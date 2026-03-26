@@ -34,7 +34,7 @@ export function SidebarUser({ collapsed }: SidebarUserProps) {
           <button
             className={cn(
               'flex items-center gap-2.5 w-full rounded-lg px-2 py-2 text-sm',
-              'hover:bg-accent transition-colors',
+              'hover:bg-background/40 transition-colors',
               collapsed && 'justify-center px-0',
             )}
             aria-label="User menu"

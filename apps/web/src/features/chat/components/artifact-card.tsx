@@ -46,14 +46,14 @@ export const ArtifactCard = memo(({ invocation, isStreaming, onOpen }: ArtifactC
       disabled={isGenerating}
       aria-label={`Preview ${component.name || 'component'}`}
       className={cn(
-        'group flex w-full max-w-sm flex-col items-start gap-2 rounded-xl border border-border bg-card p-4 transition-all focus-ring text-left mt-2',
+        'group flex w-full max-w-sm flex-col items-start gap-2 rounded-xl border border-border bg-secondary backdrop-blur-md p-4 transition-all focus-ring text-left mt-2',
         isGenerating
           ? 'opacity-70 cursor-wait'
-          : 'hover:border-primary/50 hover:shadow-lg cursor-pointer glass-card',
+          : 'hover:border-primary/50 hover:shadow-lg cursor-pointer',
       )}
     >
       <div className="flex items-center gap-3 w-full">
-        <div className="flex shrink-0 items-center justify-center rounded-md bg-primary/10 p-2 text-primary group-hover:bg-primary/20 transition-colors">
+        <div className="flex shrink-0 items-center justify-center rounded-xl bg-primary/10 p-2 text-primary group-hover:bg-primary/20 transition-colors">
           <HugeiconsIcon
             icon={CodeCircleIcon}
             size={20}

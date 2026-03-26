@@ -21,7 +21,7 @@ export function Sidebar() {
       <aside
         className={cn(
           'hidden md:flex flex-col transition-all duration-500 ease-in-out shrink-0 overflow-hidden',
-          'my-4 ml-4 h-[calc(100vh-2rem)] rounded-2xl glass-panel shadow-2xl',
+          'my-4 ml-4 h-[calc(100vh-2rem)] rounded-2xl bg-secondary border border-white/5 shadow-2xl backdrop-blur-xl',
           !sidebarOpen ? 'w-[72px]' : 'w-[280px]',
         )}
       >
