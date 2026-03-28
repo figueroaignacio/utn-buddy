@@ -5,12 +5,15 @@ The NachAI ESLint package provides a centralized and standardized linting config
 ## Configuration Structure
 
 ### Base Configuration
+
 Standard linting rules for Node.js and universal TypeScript logic. It forms the foundation for all other configurations in the repository.
 
 ### Next.js Configuration
+
 Extended rules for Next.js 16 projects, incorporating specific React 19 patterns and server component best practices.
 
 ### React Internal Configuration
+
 Optimized for shared React libraries (e.g., @repo/ui), focusing on internal component safety and exports management.
 
 ## Integration Patterns
@@ -26,6 +29,7 @@ export default next;
 ## Technical Quality Standards
 
 The configurations incorporate industry-standard plugins for:
+
 - TypeScript linting and type safety.
 - Import organization and barrel maintenance.
 - Accessibility (A11y) verification for React components.

@@ -33,7 +33,7 @@ NachAI is an AI-driven UI generation platform that converts natural language des
 - AI Integration: Vercel AI SDK and Google Gemini for advanced model orchestration.
 - Security Infrastructure: Passport-based middleware for multi-provider OAuth and JWT-based session management.
 
-### Shared Infrastructure (packages/*)
+### Shared Infrastructure (packages/\*)
 
 - @repo/ui: Standardized React component library and theme tokens.
 - @repo/ai: Core AI orchestration logic and prompt management.
@@ -52,12 +52,14 @@ NachAI is an AI-driven UI generation platform that converts natural language des
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/your-username/ui-generator.git
    cd ui-generator
    ```
 
 2. Bootstrap dependencies:
+
    ```bash
    pnpm install
    ```
@@ -69,11 +71,13 @@ NachAI is an AI-driven UI generation platform that converts natural language des
 ### Running Locally
 
 Execute the following command to start all workspaces in development mode:
+
 ```bash
 pnpm dev
 ```
 
 Project endpoints:
+
 - Frontend: http://localhost:3000
 - Backend: http://localhost:3001
 
@@ -97,9 +101,9 @@ Project endpoints:
 ## Build Process
 
 To compile all applications and packages via Turborepo:
+
 ```bash
 pnpm build
 ```
 
 Created by [Ignacio Figueroa](https://github.com/figueroaignacio)
-
