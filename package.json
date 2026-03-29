@@ -6,13 +6,18 @@
   "scripts": {
     "web": "cd apps/web && pnpm run dev",
     "api": "cd apps/api && uv run uvicorn app.main:app --reload",
-    "dev": "concurrently \"pnpm run web\" \"pnpm run api\""
+    "dev": "concurrently \"pnpm run web\" \"pnpm run api\"",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.33.0",
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0"
   }
 }
