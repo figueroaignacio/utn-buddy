@@ -1,12 +1,12 @@
 export default {
   // React + Vite (web) — ESLint on staged files
   'apps/web/**/*.{ts,tsx}': (filenames) => [
-    `cd apps/web && npx eslint --fix ${filenames.map((f) => f.replace(/.*apps\/web\//, '')).join(' ')}`,
+    `npx --prefix apps/web eslint --fix ${filenames.join(' ')}`,
   ],
 
   // Python + FastAPI (api) — Ruff lint + format on staged files
   'apps/api/**/*.py': (filenames) => [
-    `cd apps/api && uv run ruff check --fix ${filenames.map((f) => f.replace(/.*apps\/api\//, '')).join(' ')}`,
-    `cd apps/api && uv run ruff format ${filenames.map((f) => f.replace(/.*apps\/api\//, '')).join(' ')}`,
+    `uv run --project apps/api ruff check --fix ${filenames.join(' ')}`,
+    `uv run --project apps/api ruff format ${filenames.join(' ')}`,
   ],
 };
