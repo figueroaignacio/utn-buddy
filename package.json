@@ -1,0 +1,22 @@
+{
+  "name": "NachAI",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"pnpm --filter web dev\" \"pnpm --filter api dev\"",
+    "build": "pnpm --filter web build",
+    "lint": "pnpm --filter web lint",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "Ignacio Figueroa",
+  "license": "ISC",
+  "packageManager": "pnpm@10.33.0",
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "concurrently": "^9.2.1",
+    "husky": "^9.1.7"
+  }
+}
