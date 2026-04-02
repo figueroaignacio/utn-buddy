@@ -36,7 +36,7 @@ async def github_callback(
     svc: AuthService = Depends(get_auth_service),
 ):
     if not oauth_state or oauth_state != state:
-        from app.modules.AUTHENTICATION.exceptions import OAuthError
+        from app.modules.auth.exceptions import OAuthError
 
         raise OAuthError("Invalid state parameter")
 
@@ -63,7 +63,7 @@ async def google_callback(
     svc: AuthService = Depends(get_auth_service),
 ):
     if not oauth_state or oauth_state != state:
-        from app.modules.AUTHENTICATION.exceptions import OAuthError
+        from app.modules.auth.exceptions import OAuthError
 
         raise OAuthError("Invalid state parameter")
 
@@ -78,7 +78,7 @@ async def refresh_tokens(
     refresh_token: str | None = Cookie(default=None),
     svc: AuthService = Depends(get_auth_service),
 ):
-    from app.modules.AUTHENTICATION.exceptions import InvalidToken
+    from app.modules.auth.exceptions import InvalidToken
 
     if not refresh_token:
         raise InvalidToken()
