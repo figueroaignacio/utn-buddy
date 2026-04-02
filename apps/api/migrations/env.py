@@ -1,12 +1,18 @@
 import asyncio
 from logging.config import fileConfig
 
+import ssl
+
 from alembic import context
 from app.config import settings
 from app.database import Base
 from app.modules.users.model import User  # noqa: F401
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
+
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.database_url)
@@ -34,6 +40,7 @@ async def run_migrations_online() -> None:
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args={"ssl": ssl_context},
     )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

@@ -6,6 +6,8 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
 ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 engine = create_async_engine(
     settings.database_url,

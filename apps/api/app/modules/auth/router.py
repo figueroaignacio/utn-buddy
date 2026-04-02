@@ -19,19 +19,27 @@ def get_auth_service(db: AsyncSession = Depends(get_db)) -> AuthService:
 
 
 @router.get("/github")
-def github_login(response: Response):
+def github_login():
     state = secrets.token_urlsafe(32)
     service = AuthService(user_service=None)
     url = service.get_github_authorize_url(state)
-    response.set_cookie(key="oauth_state", value=state, httponly=True, max_age=600)
-    return RedirectResponse(url)
+    redirect = RedirectResponse(url)
+    redirect.set_cookie(
+        key="oauth_state",
+        value=state,
+        httponly=True,
+        max_age=600,
+        samesite="lax",
+        secure=False,
+        path="/",
+    )
+    return redirect
 
 
 @router.get("/github/callback")
 async def github_callback(
     code: str,
     state: str,
-    response: Response,
     oauth_state: str | None = Cookie(default=None),
     svc: AuthService = Depends(get_auth_service),
 ):
@@ -40,25 +48,34 @@ async def github_callback(
 
         raise OAuthError("Invalid state parameter")
 
-    response.delete_cookie("oauth_state")
-    await svc.handle_github_callback(code, response)
-    return RedirectResponse(f"{settings.frontend_url}/chat")
+    redirect = RedirectResponse(f"{settings.frontend_url}/chat")
+    redirect.delete_cookie("oauth_state", path="/")
+    await svc.handle_github_callback(code, redirect)
+    return redirect
 
 
 @router.get("/google")
-def google_login(response: Response):
+def google_login():
     state = secrets.token_urlsafe(32)
     service = AuthService(user_service=None)
     url = service.get_google_authorize_url(state)
-    response.set_cookie(key="oauth_state", value=state, httponly=True, max_age=600)
-    return RedirectResponse(url)
+    redirect = RedirectResponse(url)
+    redirect.set_cookie(
+        key="oauth_state",
+        value=state,
+        httponly=True,
+        max_age=600,
+        samesite="lax",
+        secure=False,
+        path="/",
+    )
+    return redirect
 
 
 @router.get("/google/callback")
 async def google_callback(
     code: str,
     state: str,
-    response: Response,
     oauth_state: str | None = Cookie(default=None),
     svc: AuthService = Depends(get_auth_service),
 ):
@@ -67,9 +84,10 @@ async def google_callback(
 
         raise OAuthError("Invalid state parameter")
 
-    response.delete_cookie("oauth_state")
-    await svc.handle_google_callback(code, response)
-    return RedirectResponse(f"{settings.frontend_url}/chat")
+    redirect = RedirectResponse(f"{settings.frontend_url}/chat")
+    redirect.delete_cookie("oauth_state", path="/")
+    await svc.handle_google_callback(code, redirect)
+    return redirect
 
 
 @router.post("/refresh")

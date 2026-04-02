@@ -77,6 +77,7 @@ class AuthService:
             secure=not settings.debug,
             samesite="lax",
             max_age=settings.access_token_expire_minutes * 60,
+            path="/",
         )
         response.set_cookie(
             key="refresh_token",
@@ -85,8 +86,9 @@ class AuthService:
             secure=not settings.debug,
             samesite="lax",
             max_age=settings.refresh_token_expire_days * 86400,
+            path="/",
         )
 
     def _clear_cookies(self, response: Response) -> None:
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
+        response.delete_cookie("access_token", path="/")
+        response.delete_cookie("refresh_token", path="/")
