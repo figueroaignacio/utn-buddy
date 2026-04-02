@@ -4,6 +4,6 @@
     "cross-env": "^7.0.3"
   },
   "scripts": {
-    "dev": "cross-env PYTHONUTF8=1 uv run fastapi dev main.py --port 8000"
+    "dev": "cross-env PYTHONUTF8=1 uv run fastapi dev app/main.py --port 8000"
   }
 }
