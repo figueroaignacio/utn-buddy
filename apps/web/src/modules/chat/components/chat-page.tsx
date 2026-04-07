@@ -20,6 +20,7 @@ export function ChatPage() {
   return (
     <div>
       <h1>Chat</h1>
+      <img src={user.avatar_url} alt={user?.username} />
       <p>{user?.email}</p>
       <p>{user?.username}</p>
       <LogoutButton />
