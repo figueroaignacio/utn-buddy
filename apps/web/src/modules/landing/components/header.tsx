@@ -4,11 +4,9 @@ import { LoginDialog } from "./login-dialog";
 
 export function Header() {
   return (
-    <header className="container flex justify-between items-center py-2">
-      <div>
+    <header className="py-2 bg-card">
+      <div className="container flex justify-between items-center">
         <Logo />
-      </div>
-      <div>
         <LoginDialog>
           <Button variant="secondary">Try NachUI</Button>
         </LoginDialog>

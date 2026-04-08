@@ -1,6 +1,6 @@
 "use client";
 
-import { Loading02Icon } from "@hugeicons/core-free-icons";
+import { Loading03Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
@@ -122,7 +122,7 @@ const ButtonRoot = ({
             aria-hidden="true">
             {loader ?? (
               <HugeiconsIcon
-                icon={Loading02Icon}
+                icon={Loading03Icon}
                 className="size-4 animate-spin"
                 size={16}
               />

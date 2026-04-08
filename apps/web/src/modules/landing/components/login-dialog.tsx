@@ -7,20 +7,46 @@ import { Button } from "@repo/ui/components/button";
 import { Dialog } from "@repo/ui/components/dialog";
 import { Separator } from "@repo/ui/components/separator";
 import Link from "next/link";
+import { useState } from "react";
+
+type ProviderId = "github" | "google";
+
+const AUTH_PROVIDERS = [
+  {
+    id: "github" as ProviderId,
+    label: "Continue with GitHub",
+    icon: <GitHubIcon />,
+    action: loginWithGithub,
+  },
+  {
+    id: "google" as ProviderId,
+    label: "Continue with Google",
+    icon: <GoogleIcon />,
+    action: loginWithGoogle,
+  },
+] as const;
 
 interface LoginDialogProps {
   children: React.ReactNode;
 }
 
 export function LoginDialog({ children }: LoginDialogProps) {
-  async function handleGoogle() {
-    const url = await loginWithGoogle();
-    window.location.href = url;
-  }
+  const [loadingProvider, setLoadingProvider] = useState<ProviderId | null>(
+    null,
+  );
 
-  async function handleGithub() {
-    const url = await loginWithGithub();
-    window.location.href = url;
+  async function handleLogin(
+    id: ProviderId,
+    authAction: () => Promise<string>,
+  ) {
+    try {
+      setLoadingProvider(id);
+      const url = await authAction();
+      window.location.assign(url);
+    } catch (error) {
+      console.error(error);
+      setLoadingProvider(null);
+    }
   }
 
   return (
@@ -36,18 +62,19 @@ export function LoginDialog({ children }: LoginDialogProps) {
           </Dialog.Description>
         </Dialog.Header>
         <div className="flex flex-col gap-y-3 mt-5">
-          <Button
-            onClick={handleGithub}
-            variant="outline"
-            leftIcon={<GitHubIcon />}>
-            Continue with GitHub
-          </Button>
-          <Button
-            onClick={handleGoogle}
-            variant="outline"
-            leftIcon={<GoogleIcon />}>
-            Continue with Google
-          </Button>
+          {AUTH_PROVIDERS.map((provider) => (
+            <Button
+              key={provider.id}
+              onClick={() => handleLogin(provider.id, provider.action)}
+              variant="outline"
+              leftIcon={provider.icon}
+              loading={loadingProvider === provider.id}
+              disabled={
+                loadingProvider !== null && loadingProvider !== provider.id
+              }>
+              {provider.label}
+            </Button>
+          ))}
         </div>
         <Separator className="my-4" />
         <p className="text-xs text-muted-foreground text-center">
