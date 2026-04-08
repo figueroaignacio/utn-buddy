@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { logout } from "@/modules/auth/api/auth.api";
+import { Logout01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { Button } from "@repo/ui/components/button";
 import { Dialog } from "@repo/ui/components/dialog";
+import { useState } from "react";
 
 export function LogoutButton() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,7 +25,12 @@ export function LogoutButton() {
   return (
     <Dialog>
       <Dialog.Trigger asChild>
-        <Button variant="destructive">Logout</Button>
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2 px-3 py-2 h-auto font-normal "
+          rightIcon={<HugeiconsIcon icon={Logout01Icon} size={16} />}>
+          Logout
+        </Button>
       </Dialog.Trigger>
       <Dialog.Content>
         <Dialog.Header>
@@ -34,9 +41,16 @@ export function LogoutButton() {
         </Dialog.Header>
         <Dialog.Footer>
           <Dialog.Close asChild>
-            <Button variant="outline" disabled={isLoading}>Cancel</Button>
+            <Button variant="outline" disabled={isLoading}>
+              Cancel
+            </Button>
           </Dialog.Close>
-          <Button onClick={handleLogout} variant="destructive" loading={isLoading} disabled={isLoading}>
+          <Button
+            onClick={handleLogout}
+            variant="destructive"
+            loading={isLoading}
+            disabled={isLoading}
+            rightIcon={<HugeiconsIcon icon={Logout01Icon} size={16} />}>
             Logout
           </Button>
         </Dialog.Footer>

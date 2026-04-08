@@ -1,6 +1,5 @@
 "use client";
 
-import { LogoutButton } from "@/modules/auth/components/logout-button";
 import { useAuth } from "@/modules/auth/hooks/use-auth";
 import { useRouter } from "next/navigation";
 
@@ -23,7 +22,6 @@ export function ChatPage() {
       <img src={user.avatar_url} alt={user?.username} />
       <p>{user?.email}</p>
       <p>{user?.username}</p>
-      <LogoutButton />
     </div>
   );
 }
