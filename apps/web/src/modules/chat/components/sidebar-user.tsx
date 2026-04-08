@@ -15,7 +15,7 @@ export function SidebarUser() {
   const isMobile = useIsMobile();
   const openStyle = isOpen || isMobile;
 
-  const username = user?.username;
+  const username = user?.username || "";
   const userInitials = username.substring(0, 2).toUpperCase();
   const userEmail = user?.email;
 

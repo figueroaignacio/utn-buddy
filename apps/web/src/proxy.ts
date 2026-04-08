@@ -1,10 +1,16 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+const protectedRoutes = ["/chat", "/projects", "/settings"];
+
 export function proxy(request: NextRequest) {
   const token = request.cookies.get("refresh_token")?.value;
 
-  if (!token && request.nextUrl.pathname.startsWith("/chat")) {
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    request.nextUrl.pathname.startsWith(route),
+  );
+
+  if (!token && isProtectedRoute) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
@@ -16,5 +22,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/chat/:path*", "/"],
+  matcher: ["/chat/:path*", "/projects/:path*", "/settings/:path*", "/"],
 };
