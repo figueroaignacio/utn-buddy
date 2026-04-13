@@ -94,7 +94,7 @@ def _run_search(
                     green_flags=None,
                 )
                 scored += 1
-                time.sleep(4)
+                time.sleep(6)
 
         else:
             duplicates += 1

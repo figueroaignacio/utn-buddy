@@ -146,7 +146,7 @@ class LinkedInCollector(BaseCollector):
                     url = url.split("?")[0]
 
                     jobs.append(JobData(
-                        title=title.strip(),
+                        title=title.split("\n")[0].strip(),
                         company=company.strip(),
                         url=url,
                         platform="linkedin",
