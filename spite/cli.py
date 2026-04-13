@@ -83,7 +83,6 @@ def search(
         with Progress(
             SpinnerColumn(spinner_name="dots2", style="red"),
             TextColumn("[progress.description]{task.description}"),
-            BarColumn(bar_width=None, style="dim", complete_style="red"),
             TaskProgressColumn(),
             console=console,
             transient=True,

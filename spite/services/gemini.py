@@ -1,29 +1,32 @@
 import json
+
 from google import genai
+
 from spite.config import get_settings
 
 settings = get_settings()
 
 SCORING_PROMPT = """
-You are a senior developer with 15 years of experience who has seen far too many
-ridiculous job offers. Analyze this job vacancy and rate it with brutal honesty.
+You are a senior logistics professional with 15 years of experience who has seen
+far too many ridiculous job offers. Analyze this logistics job vacancy and rate it
+with brutal honesty.
 
 SCORING CRITERIA (0.0 to 10.0):
 
 PENALTIES:
-- "Startup environment" without mentioning compensation → -2 points
-- More than 3 technologies required for a junior role → -1.5 points
-- "Rockstar", "ninja", "evangelist" in the title → -2 points
 - "Competitive salary" without a real number → -1.5 points
-- 5+ years of experience for technologies less than 5 years old → -3 points
+- Vague responsibilities like "manage operations" with no specifics → -1 point
 - "We're a family" → -1 point
 - Contradictory requirements (junior with senior responsibilities) → -2 points
-- Stack of 10+ required technologies → -1.5 points
+- Requires 5+ certifications for an entry level role → -1.5 points
+- No mention of tools (WMS, ERP, TMS, Excel) → -1 point
 
 BONUSES:
 - Explicit salary in the ad → +2 points
-- Clear and reasonable technical stack → +1 point
-- Explicit remote modality → +1 point
+- Specific tools mentioned (SAP, Oracle, WMS) → +1 point
+- Explicit remote or hybrid modality → +1 point
+- Clear career growth path described → +1 point
+- Specific industry mentioned (cold chain, ecommerce, pharma) → +0.5 points
 
 Title: {title}
 Company: {company}
