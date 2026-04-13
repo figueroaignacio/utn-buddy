@@ -1,9 +1,8 @@
 import asyncio
-
+import time
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
 from spite.collectors.linkedin import LinkedInCollector
 from spite.db import crud
 from spite.db.engine import get_db
@@ -68,7 +67,6 @@ def _run_search(
             if score:
                 description = asyncio.run(collector.get_description(job_data.url))
 
-                # Truncar a 2000 caracteres para no gastar tokens de más
                 if description:
                     description = description[:2000]
                     db_job = crud.get_job_by_id(db, job.id)
@@ -94,6 +92,8 @@ def _run_search(
                     green_flags=None,
                 )
                 scored += 1
+                time.sleep(4)  # Respetar rate limit de Gemini (15 req/min)
+
         else:
             duplicates += 1
 

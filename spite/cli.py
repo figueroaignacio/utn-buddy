@@ -5,7 +5,6 @@ from rich.align import Align
 from rich.console import Console, Group
 from rich.panel import Panel
 from rich.progress import (
-    BarColumn,
     Progress,
     SpinnerColumn,
     TaskProgressColumn,
@@ -163,26 +162,16 @@ def list_jobs(
     table.add_column("ID", justify="right", style="dim", width=4)
     table.add_column("Title", style="white", max_width=35, no_wrap=True)
     table.add_column("Company", style="white", max_width=20, no_wrap=True)
-    table.add_column("Status", justify="center", width=10)
     table.add_column("Summary", style="dim", max_width=50, no_wrap=True)
-    table.add_column("URL", style="dim", max_width=45, no_wrap=True)
+    table.add_column("URL", style="dim", max_width=100, no_wrap=True)
 
     for job in jobs:
-        status_map = {
-            "new": "new",
-            "scored": "[green]scored[/green]",
-            "applied": "[yellow]applied[/yellow]",
-            "ignored": "[dim]ignored[/dim]",
-            "rejected": "[red]rejected[/red]",
-        }
-        status_str = status_map.get(job["status"], job["status"])
         summary = job.get("score_summary") or "—"
 
         table.add_row(
             str(job["id"]),
             job["title"],
             job["company"],
-            status_str,
             summary,
             job["url"],
         )
