@@ -9,7 +9,7 @@ from spite.cli.commands import API_BASE, console
 
 def list_jobs(
     min_score: float = typer.Option(
-        0.0, "--min-score", "-s", help="Minimum Gemini score"
+        0.0, "--min-score", "-s", help="Minimum Groq AI score"
     ),
     platform: str = typer.Option(None, "--platform", "-p", help="Filter by platform"),
     limit: int = typer.Option(50, "--limit", "-n", help="Max results"),
@@ -55,7 +55,7 @@ def list_jobs(
 def inspect(
     job_id: int = typer.Argument(..., help="Job ID to inspect"),
 ) -> None:
-    """Show full details of a job, including Gemini's verdict."""
+    """Show full details of a job, including Groq's verdict."""
     try:
         response = httpx.get(f"{API_BASE}/jobs/{job_id}")
         if response.status_code == 404:

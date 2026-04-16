@@ -10,7 +10,7 @@ from spite.api.dependencies import get_db
 from spite.schemas.search import SearchRequest, SearchResult
 from spite.schemas.job import JobCreate, JobUpdate
 from spite.repositories.job_repository import job_repository
-from spite.services.gemini import gemini_service
+from spite.services.groq_service import groq_service
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ async def _run_search(
                     await db.commit()
 
                 result = await asyncio.to_thread(
-                    gemini_service.score_job,
+                    groq_service.score_job,
                     query=query,
                     title=job_data.title,
                     company=job_data.company,
@@ -96,7 +96,7 @@ async def _run_search(
 
 @router.post("/", response_model=SearchResult)
 async def run_search(body: SearchRequest, db: AsyncSession = Depends(get_db)):
-    """Scrape jobs and score them with Gemini."""
+    """Scrape jobs and score them with Groq."""
     return await _run_search(
         query=body.query,
         location=body.location,

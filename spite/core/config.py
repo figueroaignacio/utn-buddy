@@ -10,7 +10,7 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    gemini_api_key: str
+    groq_api_key: str
     database_url: str = "sqlite+aiosqlite:///./spite.db"
     api_host: str = "127.0.0.1"
     api_port: int = 8000

@@ -13,7 +13,7 @@ def search(
         "Argentina", "--location", "-l", help="Location to search"
     ),
     hours: int = typer.Option(24, "--hours", "-h", help="Jobs from the last N hours"),
-    no_score: bool = typer.Option(False, "--no-score", help="Skip Gemini scoring"),
+    no_score: bool = typer.Option(False, "--no-score", help="Skip Groq scoring"),
     visible: bool = typer.Option(False, "--visible", help="Show browser window"),
     max_jobs: int = typer.Option(50, "--max-jobs", "-m", help="Max jobs to scrape"),
 ) -> None:

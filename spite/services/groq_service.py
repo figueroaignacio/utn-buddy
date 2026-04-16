@@ -1,7 +1,7 @@
 import json
 import time
 
-from google import genai
+from groq import Groq
 
 from spite.core.config import get_settings
 
@@ -29,10 +29,10 @@ Respond ONLY with valid JSON:
 """
 
 
-class GeminiService:
+class GroqService:
     def __init__(self) -> None:
-        self.client = genai.Client(api_key=settings.gemini_api_key)
-        self.model = "gemini-2.0-flash"
+        self.client = Groq(api_key=settings.groq_api_key)
+        self.model = "llama-3.3-70b-versatile"
 
     def score_job(
         self,
@@ -57,11 +57,16 @@ class GeminiService:
 
         for attempt in range(max_retries):
             try:
-                response = self.client.models.generate_content(
+                response = self.client.chat.completions.create(
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": prompt,
+                        }
+                    ],
                     model=self.model,
-                    contents=prompt,
                 )
-                raw = response.text.strip()
+                raw = response.choices[0].message.content.strip()
                 if raw.startswith("```"):
                     raw = raw.split("```")[1]
                     if raw.startswith("json"):
@@ -74,7 +79,7 @@ class GeminiService:
                 return {"score": 5.0, "summary": "Could not parse AI response."}
             except Exception as e:
                 error_str = str(e)
-                if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                if "429" in error_str or "rate_limit" in error_str.lower():
                     if attempt < max_retries - 1:
                         time.sleep(base_delay * (2**attempt))
                         continue
@@ -90,4 +95,4 @@ class GeminiService:
         return {"score": 0.0, "summary": summary}
 
 
-gemini_service = GeminiService()
+groq_service = GroqService()
