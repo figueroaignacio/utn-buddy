@@ -1,9 +1,8 @@
-"""
-LinkedIn collector.
-Scrapeamos LinkedIn porque la vida es demasiado corta para hacerlo a mano.
-"""
 import asyncio
-from playwright.async_api import async_playwright, Page
+import urllib.parse
+
+from playwright.async_api import Page, async_playwright
+
 from spite.collectors.base import BaseCollector, JobData
 from spite.core.config import get_settings
 
@@ -13,7 +12,6 @@ SESSION_DIR = ".browser_session"
 
 
 class LinkedInCollector(BaseCollector):
-
     async def search(
         self, query: str, location: str = "", hours: int = 24, max_jobs: int = 50
     ) -> list[JobData]:
@@ -31,8 +29,8 @@ class LinkedInCollector(BaseCollector):
             seconds = hours * 3600
             search_url = (
                 f"https://www.linkedin.com/jobs/search/"
-                f"?keywords={query.replace(' ', '%20')}"
-                f"&location={location.replace(' ', '%20')}"
+                f"?keywords={urllib.parse.quote(query)}"
+                f"&location={urllib.parse.quote(location)}"
                 f"&f_TPR=r{seconds}"
             )
 
@@ -81,10 +79,6 @@ class LinkedInCollector(BaseCollector):
         return "login" in page.url or "authwall" in page.url
 
     async def _load_all_cards(self, page: Page, max_jobs: int) -> None:
-        """
-        Scrollea card por card para forzar el intersection observer de LinkedIn.
-        Sin esto, las cards fuera del viewport quedan como placeholders vacíos.
-        """
         previous_count = 0
         no_change_attempts = 0
 
@@ -101,14 +95,12 @@ class LinkedInCollector(BaseCollector):
 
             previous_count = current_count
 
-            # Scroll card por card para activar lazy load
             for card in cards:
                 await card.scroll_into_view_if_needed()
                 await asyncio.sleep(0.2)
 
             await asyncio.sleep(2)
 
-            # Botón "ver más" si aparece
             see_more = page.locator("button.infinite-scroller__show-more-button")
             if await see_more.count() > 0:
                 await see_more.click()
@@ -129,8 +121,12 @@ class LinkedInCollector(BaseCollector):
                     if not link_el:
                         link_el = await card.query_selector("a[href*='/jobs/view/']")
 
-                    company_el = await card.query_selector(".artdeco-entity-lockup__subtitle")
-                    location_el = await card.query_selector(".job-card-container__metadata-wrapper")
+                    company_el = await card.query_selector(
+                        ".artdeco-entity-lockup__subtitle"
+                    )
+                    location_el = await card.query_selector(
+                        ".job-card-container__metadata-wrapper"
+                    )
 
                     title = await link_el.inner_text() if link_el else None
                     url = await link_el.get_attribute("href") if link_el else None
@@ -145,13 +141,15 @@ class LinkedInCollector(BaseCollector):
 
                     url = url.split("?")[0]
 
-                    jobs.append(JobData(
-                        title=title.split("\n")[0].strip(),
-                        company=company.strip(),
-                        url=url,
-                        platform="linkedin",
-                        location=location.strip() if location else None,
-                    ))
+                    jobs.append(
+                        JobData(
+                            title=title.split("\n")[0].strip(),
+                            company=company.strip(),
+                            url=url,
+                            platform="linkedin",
+                            location=location.strip() if location else None,
+                        )
+                    )
 
                 except Exception:
                     continue

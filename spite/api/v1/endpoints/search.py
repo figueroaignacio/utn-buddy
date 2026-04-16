@@ -64,6 +64,7 @@ async def _run_search(
 
                 result = await asyncio.to_thread(
                     gemini_service.score_job,
+                    query=query,
                     title=job_data.title,
                     company=job_data.company,
                     description=description or "",
