@@ -4,9 +4,9 @@ from rich.console import Console, Group
 from rich.panel import Panel
 from rich.text import Text
 
-from spite.commands.jobs import apply, clear, ignore, inspect, list_jobs
-from spite.commands.search import search
-from spite.commands.version import version
+from spite.cli.commands.jobs import apply, clear, ignore, inspect, list_jobs
+from spite.cli.commands.search import search
+from spite.cli.commands.version import version
 
 app = typer.Typer(
     name="spite",

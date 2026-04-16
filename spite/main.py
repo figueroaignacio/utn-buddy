@@ -3,15 +3,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from spite import __version__
-from spite.api.jobs import router as jobs_router
-from spite.api.search import router as search_router
-from spite.db.engine import init_db
+from spite.api.v1.router import api_router
+from spite.core.database import Base, engine
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_db()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     yield
+    await engine.dispose()
 
 
 app = FastAPI(
@@ -23,8 +24,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(jobs_router)
-app.include_router(search_router)
+app.include_router(api_router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["meta"])

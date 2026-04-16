@@ -5,7 +5,7 @@ Scrapeamos LinkedIn porque la vida es demasiado corta para hacerlo a mano.
 import asyncio
 from playwright.async_api import async_playwright, Page
 from spite.collectors.base import BaseCollector, JobData
-from spite.config import get_settings
+from spite.core.config import get_settings
 
 settings = get_settings()
 

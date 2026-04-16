@@ -4,7 +4,7 @@ from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 from rich.table import Table
 
-from spite.commands import API_BASE, console
+from spite.cli.commands import API_BASE, console
 
 
 def search(

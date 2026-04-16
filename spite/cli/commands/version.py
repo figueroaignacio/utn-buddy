@@ -1,4 +1,4 @@
-from spite.commands import console
+from spite.cli.commands import console
 
 
 def version() -> None:

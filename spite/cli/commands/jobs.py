@@ -4,7 +4,7 @@ from rich.console import Group
 from rich.panel import Panel
 from rich.text import Text
 
-from spite.commands import API_BASE, console
+from spite.cli.commands import API_BASE, console
 
 
 def list_jobs(

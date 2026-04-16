@@ -1,6 +1,6 @@
 import json
 from google import genai
-from spite.config import get_settings
+from spite.core.config import get_settings
 
 settings = get_settings()
 
