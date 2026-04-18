@@ -1,5 +1,10 @@
 import { AppSidebar } from "@/modules/chat/components/app-sidebar";
 import { MobileHeader } from "@/modules/chat/components/mobile-header";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "NachAI",
+};
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
