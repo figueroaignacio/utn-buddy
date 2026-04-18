@@ -1,5 +1,3 @@
-"use client";
-
 import { logout } from "@/modules/auth/api/auth.api";
 import { Logout01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";

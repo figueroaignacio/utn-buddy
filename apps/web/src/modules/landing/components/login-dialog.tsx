@@ -1,12 +1,10 @@
-"use client";
-
 import { loginWithGithub, loginWithGoogle } from "@/modules/auth/api/auth.api";
 import { Logo } from "@/shared/components/logo";
 import { GitHubIcon, GoogleIcon } from "@/shared/components/tech-icons";
 import { Button } from "@repo/ui/components/button";
 import { Dialog } from "@repo/ui/components/dialog";
 import { Separator } from "@repo/ui/components/separator";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 
 type ProviderId = "github" | "google";
@@ -78,7 +76,10 @@ export function LoginDialog({ children }: LoginDialogProps) {
         </div>
         <Separator className="my-4" />
         <p className="text-xs text-muted-foreground text-center">
-          To continue you accept our <Link href="/terms">Terms of Service</Link>{" "}
+          To continue you accept our
+          <Link to="/" className="underline">
+            Terms of Service
+          </Link>
           and Privacy Policy
         </p>
       </Dialog.Content>

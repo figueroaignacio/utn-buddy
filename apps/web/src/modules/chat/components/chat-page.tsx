@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/modules/auth/hooks/use-auth";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@tanstack/react-router";
 
 export function ChatPage() {
   const { user, isLoading } = useAuth();
@@ -12,7 +12,7 @@ export function ChatPage() {
   }
 
   if (!user) {
-    router.push("/");
+    router.navigate({ to: "/" });
     return null;
   }
 
