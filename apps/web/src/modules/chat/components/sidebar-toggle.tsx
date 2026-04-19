@@ -1,5 +1,3 @@
-"use client";
-
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { useSidebar } from "@/shared/store/use-sidebar";
 import { PanelLeftIcon } from "@hugeicons/core-free-icons";

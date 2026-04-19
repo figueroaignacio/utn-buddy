@@ -1,5 +1,3 @@
-"use client";
-
 import { useSidebar } from "@/shared/store/use-sidebar";
 import { AnimatePresence, motion } from "motion/react";
 import { SidebarActions } from "./sidebar-actions";

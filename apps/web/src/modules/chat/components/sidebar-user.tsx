@@ -1,5 +1,3 @@
-"use client";
-
 import { LogoutButton } from "@/modules/auth/components/logout-button";
 import { useAuth } from "@/modules/auth/hooks/use-auth";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
