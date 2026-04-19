@@ -2,6 +2,7 @@ from app.database import get_db
 from app.modules.auth.deps import get_current_user
 from app.modules.conversations.schemas import (
     ConversationCreate,
+    ConversationListRead,
     ConversationRead,
     MessageCreate,
     MessageRead,
@@ -29,7 +30,7 @@ async def create_conversation(
     return await svc.create(user, dto)
 
 
-@router.get("/", response_model=list[ConversationRead])
+@router.get("/", response_model=list[ConversationListRead])
 async def list_conversations(
     user: User = Depends(get_current_user),
     svc: ConversationService = Depends(get_service),

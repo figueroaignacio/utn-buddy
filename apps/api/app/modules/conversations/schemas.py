@@ -20,6 +20,16 @@ class MessageRead(BaseModel):
     created_at: datetime
 
 
+class ConversationListRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    title: str | None
+    user_id: str
+    created_at: datetime
+    updated_at: datetime
+
+
 class ConversationRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

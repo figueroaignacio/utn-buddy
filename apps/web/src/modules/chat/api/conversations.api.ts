@@ -1,7 +1,7 @@
 import { API_URL } from "@/shared/lib/config";
 
 export async function createConversation(title?: string) {
-  const res = await fetch(`${API_URL}/conversations`, {
+  const res = await fetch(`${API_URL}/conversations/`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -20,7 +20,7 @@ export async function getConversation(id: string) {
 }
 
 export async function getConversations() {
-  const res = await fetch(`${API_URL}/conversations`, {
+  const res = await fetch(`${API_URL}/conversations/`, {
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to get conversations");
