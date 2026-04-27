@@ -1,7 +1,0 @@
-@import "@repo/ui/globals.css";
-
-@layer utilities {
-  .container {
-    @apply px-4 lg:px-0 mx-auto max-w-360;
-  }
-}
